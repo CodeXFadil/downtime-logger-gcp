@@ -14,35 +14,56 @@
       min-height: 100vh;
     }
 
+    /* ---- Login overlay ---- */
+    #login-overlay {
+      position: fixed; inset: 0;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000;
+    }
+    .login-card {
+      background: #fff; border-radius: 16px; padding: 48px 40px;
+      text-align: center; max-width: 400px; width: 90%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    .login-logo { font-size: 36px; font-weight: 800; color: #e94560; margin-bottom: 6px; }
+    .login-sub  { color: #888; font-size: 14px; margin-bottom: 8px; }
+    .login-desc { color: #aaa; font-size: 12px; margin-bottom: 32px; }
+    .google-btn {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      width: 100%; padding: 14px; border: 1.5px solid #dde1ea; border-radius: 8px;
+      background: #fff; cursor: pointer; font-size: 15px; font-weight: 600;
+      color: #333; transition: background 0.2s; font-family: inherit;
+    }
+    .google-btn:hover   { background: #f8f8f8; }
+    .google-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .google-btn img { width: 20px; height: 20px; }
+    .login-error { margin-top: 14px; color: #c0392b; font-size: 13px; }
+
     /* ---- Header ---- */
     header {
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
       color: #fff;
-      padding: 20px 32px;
+      padding: 16px 32px;
       display: flex;
       align-items: center;
       gap: 16px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
-    header .logo {
-      font-size: 28px;
-      font-weight: 800;
-      letter-spacing: -1px;
-      color: #e94560;
-    }
-    header .tagline {
-      font-size: 14px;
-      color: #a8b2d8;
-    }
+    header .logo    { font-size: 28px; font-weight: 800; letter-spacing: -1px; color: #e94560; }
+    header .tagline { font-size: 14px; color: #a8b2d8; }
+    header .right   { margin-left: auto; display: flex; align-items: center; gap: 12px; }
     header .site-badge {
-      margin-left: auto;
-      background: #e94560;
-      color: #fff;
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
+      background: #e94560; color: #fff;
+      padding: 6px 16px; border-radius: 20px;
+      font-size: 13px; font-weight: 600;
     }
+    header .user-info { font-size: 13px; color: #a8b2d8; }
+    .signout-btn {
+      background: none; border: 1px solid #a8b2d8; border-radius: 6px;
+      color: #a8b2d8; padding: 4px 12px; font-size: 12px; cursor: pointer;
+    }
+    .signout-btn:hover { background: rgba(255,255,255,0.1); }
 
     /* ---- Layout ---- */
     .container {
@@ -53,161 +74,110 @@
       grid-template-columns: 1fr 1.4fr;
       gap: 24px;
     }
-
-    @media (max-width: 768px) {
-      .container { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
 
     /* ---- Card ---- */
     .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 28px;
+      background: #fff; border-radius: 12px; padding: 28px;
       box-shadow: 0 2px 12px rgba(0,0,0,0.08);
     }
     .card h2 {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 20px;
-      color: #1a1a2e;
-      border-bottom: 2px solid #e94560;
-      padding-bottom: 10px;
+      font-size: 18px; font-weight: 700; margin-bottom: 20px;
+      color: #1a1a2e; border-bottom: 2px solid #e94560; padding-bottom: 10px;
     }
 
     /* ---- Form ---- */
     .form-group { margin-bottom: 18px; }
     label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: #555;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      display: block; font-size: 13px; font-weight: 600; color: #555;
+      margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;
     }
     input, select, textarea {
-      width: 100%;
-      padding: 10px 14px;
-      border: 1.5px solid #dde1ea;
-      border-radius: 8px;
-      font-size: 15px;
-      color: #1a1a2e;
-      background: #fafbfc;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      outline: none;
+      width: 100%; padding: 10px 14px; border: 1.5px solid #dde1ea;
+      border-radius: 8px; font-size: 15px; color: #1a1a2e; background: #fafbfc;
+      transition: border-color 0.2s, box-shadow 0.2s; outline: none;
     }
     input:focus, select:focus, textarea:focus {
-      border-color: #e94560;
-      box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.12);
-      background: #fff;
+      border-color: #e94560; box-shadow: 0 0 0 3px rgba(233,69,96,0.12); background: #fff;
     }
     textarea { resize: vertical; min-height: 80px; }
 
     .btn-submit {
-      width: 100%;
-      padding: 13px;
+      width: 100%; padding: 13px;
       background: linear-gradient(135deg, #e94560, #c0392b);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: opacity 0.2s, transform 0.1s;
+      color: #fff; border: none; border-radius: 8px; font-size: 16px;
+      font-weight: 700; cursor: pointer; transition: opacity 0.2s, transform 0.1s;
       letter-spacing: 0.3px;
     }
-    .btn-submit:hover  { opacity: 0.9; }
-    .btn-submit:active { transform: scale(0.99); }
+    .btn-submit:hover    { opacity: 0.9; }
+    .btn-submit:active   { transform: scale(0.99); }
     .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
     /* ---- Toast ---- */
     #toast {
-      display: none;
-      margin-top: 14px;
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
+      display: none; margin-top: 14px; padding: 12px 16px;
+      border-radius: 8px; font-size: 14px; font-weight: 600;
     }
     #toast.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
     #toast.error   { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
     /* ---- Records table ---- */
     .table-wrapper { overflow-x: auto; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
     th {
-      background: #f0f2f5;
-      padding: 10px 12px;
-      text-align: left;
-      font-weight: 700;
-      color: #555;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-      border-bottom: 2px solid #dde1ea;
+      background: #f0f2f5; padding: 10px 12px; text-align: left;
+      font-weight: 700; color: #555; text-transform: uppercase;
+      letter-spacing: 0.4px; border-bottom: 2px solid #dde1ea;
     }
-    td {
-      padding: 10px 12px;
-      border-bottom: 1px solid #f0f2f5;
-      vertical-align: top;
-    }
+    td { padding: 10px 12px; border-bottom: 1px solid #f0f2f5; vertical-align: top; }
     tr:hover td { background: #fafbfc; }
 
     .site-tag {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 700;
-      background: #1a1a2e;
-      color: #e94560;
+      display: inline-block; padding: 2px 10px; border-radius: 12px;
+      font-size: 11px; font-weight: 700; background: #1a1a2e; color: #e94560;
     }
     .duration-badge {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 700;
-      background: #fff3cd;
-      color: #856404;
+      display: inline-block; padding: 2px 10px; border-radius: 12px;
+      font-size: 12px; font-weight: 700; background: #fff3cd; color: #856404;
     }
-    .duration-badge.high {
-      background: #f8d7da;
-      color: #721c24;
-    }
+    .duration-badge.high { background: #f8d7da; color: #721c24; }
 
     .refresh-btn {
-      background: none;
-      border: 1.5px solid #dde1ea;
-      border-radius: 8px;
-      padding: 6px 14px;
-      font-size: 13px;
-      cursor: pointer;
-      color: #555;
-      float: right;
-      margin-top: -4px;
+      background: none; border: 1.5px solid #dde1ea; border-radius: 8px;
+      padding: 6px 14px; font-size: 13px; cursor: pointer; color: #555;
+      float: right; margin-top: -4px;
     }
     .refresh-btn:hover { background: #f0f2f5; }
 
-    .empty-state {
-      text-align: center;
-      padding: 32px;
-      color: #aaa;
-      font-size: 14px;
-    }
+    .empty-state { text-align: center; padding: 32px; color: #aaa; font-size: 14px; }
   </style>
 </head>
 <body>
+
+<!-- Login overlay -->
+<div id="login-overlay">
+  <div class="login-card">
+    <div class="login-logo">W.R. Grace</div>
+    <div class="login-sub">Plant Operations — Downtime Logger</div>
+    <div class="login-desc">Sign in with your corporate Google account to continue</div>
+    <button class="google-btn" id="google-btn" onclick="signIn()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+      Sign in with Google
+    </button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
 
 <header>
   <div>
     <div class="logo">W.R. Grace</div>
     <div class="tagline">Plant Operations — Downtime Logger</div>
   </div>
-  <div class="site-badge" id="site-badge">Loading...</div>
+  <div class="right">
+    <span class="user-info" id="user-name"></span>
+    <button class="signout-btn" onclick="signOut()">Sign out</button>
+    <div class="site-badge" id="site-badge">Loading...</div>
+  </div>
 </header>
 
 <div class="container">
@@ -218,7 +188,7 @@
     <form id="downtime-form">
 
       <div class="form-group">
-        <label for="equipment_id">Equipment ID</label>
+        <label for="equipment_id">Equipment</label>
         <select id="equipment_id" required>
           <option value="">Loading...</option>
         </select>
@@ -229,11 +199,11 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <button type="button" id="btn-unplanned" onclick="setCategory('Unplanned')"
             style="padding:10px;border:1.5px solid #dde1ea;border-radius:8px;background:#fafbfc;cursor:pointer;font-weight:600;">
-            ⚠️ Unplanned
+            Unplanned
           </button>
           <button type="button" id="btn-planned" onclick="setCategory('Planned')"
             style="padding:10px;border:1.5px solid #dde1ea;border-radius:8px;background:#fafbfc;cursor:pointer;font-weight:600;">
-            📋 Planned
+            Planned
           </button>
         </div>
         <input type="hidden" id="category" />
@@ -242,20 +212,19 @@
       <div class="form-group">
         <label for="reason">Reason for Downtime</label>
         <select id="reason" required>
-          <option value="">— Select category first —</option>
+          <option value="">Select category first</option>
         </select>
       </div>
 
       <div class="form-group">
         <label for="duration_minutes">Duration (minutes)</label>
-        <input type="number" id="duration_minutes" min="1" max="9999"
-               placeholder="e.g. 45" required />
+        <input type="number" id="duration_minutes" min="1" max="9999" placeholder="e.g. 45" required />
       </div>
 
       <div class="form-group">
         <label for="shift">Shift</label>
         <select id="shift">
-          <option value="">— Select shift —</option>
+          <option value="">Select shift</option>
         </select>
       </div>
 
@@ -281,7 +250,7 @@
   <div class="card">
     <h2>
       Recent Incidents
-      <button class="refresh-btn" onclick="loadRecords()">↻ Refresh</button>
+      <button class="refresh-btn" onclick="loadRecords()">Refresh</button>
     </h2>
     <div class="table-wrapper">
       <table id="records-table">
@@ -296,7 +265,7 @@
           </tr>
         </thead>
         <tbody id="records-body">
-          <tr><td colspan="6" class="empty-state">Loading records...</td></tr>
+          <tr><td colspan="6" class="empty-state">Sign in to view records</td></tr>
         </tbody>
       </table>
     </div>
@@ -304,25 +273,114 @@
 
 </div>
 
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
 <script>
-  // Show which site this Container App is serving (comes from SITE_NAME env var)
-  async function loadSiteInfo() {
+  // Firebase config
+  firebase.initializeApp({
+    apiKey:            "AIzaSyAe04FJ0fE7Bq1mUoxx6uuGi_Cl_dKzgNY",
+    authDomain:        "grace-np-dl-develop.firebaseapp.com",
+    projectId:         "grace-np-dl-develop",
+    storageBucket:     "grace-np-dl-develop.firebasestorage.app",
+    messagingSenderId: "478659741502",
+    appId:             "1:478659741502:web:4aec195a42419d88ed8e6f"
+  });
+
+  const auth     = firebase.auth();
+  const provider = new firebase.auth.GoogleAuthProvider();
+  let   googleToken = null;
+
+  // ---- Auth ----
+
+  async function signIn() {
+    const btn = document.getElementById("google-btn");
+    const err = document.getElementById("login-error");
+    btn.disabled = true;
+    btn.textContent = "Signing in...";
+    err.textContent = "";
     try {
-      const res = await fetch("/api/health");
-      const data = await res.json();
-      document.getElementById("site-badge").textContent =
-        (data.site || "Unknown Site") + " (" + (data.region || "") + ")";
-    } catch {
-      document.getElementById("site-badge").textContent = "Offline";
+      const result     = await auth.signInWithPopup(provider);
+      const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
+      googleToken      = credential.idToken;
+      onSignedIn(result.user);
+    } catch (e) {
+      err.textContent = "Sign-in failed: " + e.message;
+      btn.disabled    = false;
+      btn.innerHTML   = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> Sign in with Google';
     }
   }
 
-  // Load recent records from /records endpoint
+  function onSignedIn(user) {
+    document.getElementById("login-overlay").style.display = "none";
+    document.getElementById("user-name").textContent       = user.displayName || user.email;
+    loadSiteInfo();
+    loadRecords();
+    loadMasterData();
+    setInterval(loadRecords, 30000);
+  }
+
+  async function signOut() {
+    await auth.signOut();
+    googleToken = null;
+    document.getElementById("login-overlay").style.display = "flex";
+    document.getElementById("records-body").innerHTML =
+      '<tr><td colspan="6" class="empty-state">Sign in to view records</td></tr>';
+    document.getElementById("site-badge").textContent = "Loading...";
+  }
+
+  // ---- Authenticated fetch ----
+
+  async function apiFetch(path, options = {}) {
+    if (!googleToken) throw new Error("Not signed in");
+    const headers = { "Authorization": "Bearer " + googleToken, "Content-Type": "application/json" };
+    return fetch(path, { ...options, headers });
+  }
+
+  // ---- App logic ----
+
+  function esc(s) {
+    return String(s || "")
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  async function loadSiteInfo() {
+    try {
+      const data = await apiFetch("/api/health").then(r => r.json());
+      document.getElementById("site-badge").textContent =
+        (data.site || "Unknown") + " (" + (data.region || "") + ")";
+    } catch { document.getElementById("site-badge").textContent = "Offline"; }
+  }
+
+  let masterData = { equipment: [], reasons: [], shifts: [] };
+
+  async function loadMasterData() {
+    try {
+      const res = await apiFetch("/api/master-data");
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      masterData = await res.json();
+
+      const equip = document.getElementById("equipment_id");
+      equip.innerHTML = '<option value="">Select equipment</option>';
+      masterData.equipment.forEach(e => {
+        equip.innerHTML += `<option value="${esc(e.id)}">${esc(e.id)} - ${esc(e.name)}</option>`;
+      });
+
+      const shiftSel = document.getElementById("shift");
+      shiftSel.innerHTML = '<option value="">Select shift</option>';
+      masterData.shifts.forEach(s => {
+        shiftSel.innerHTML += `<option value="${esc(s)}">${esc(s)}</option>`;
+      });
+    } catch (err) { console.error("Failed to load master data:", err); }
+  }
+
   async function loadRecords() {
     const tbody = document.getElementById("records-body");
     tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Loading...</td></tr>';
     try {
-      const res = await fetch("/api/records");
+      const res     = await apiFetch("/api/records");
       if (!res.ok) throw new Error("HTTP " + res.status);
       const records = await res.json();
       if (records.length === 0) {
@@ -331,7 +389,7 @@
       }
       tbody.innerHTML = records.map(r => {
         const high = r.duration_minutes >= 120;
-        const ts = r.start_time ? r.start_time.replace("T", " ").substring(0, 16) : "";
+        const ts   = r.start_time ? r.start_time.replace("T", " ").substring(0, 16) : "";
         return `<tr>
           <td><span class="site-tag">${esc(r.site)}</span></td>
           <td>${esc(r.equipment_id)}</td>
@@ -348,76 +406,28 @@
     }
   }
 
-  // Escape HTML to prevent XSS
-  function esc(s) {
-    return String(s)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-  }
-
-  // Master data loaded from /api/master-data on page load
-  let masterData = { equipment: [], reasons: [], shifts: [] };
-
-  async function loadMasterData() {
-    try {
-      const res = await fetch("/api/master-data");
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      masterData = await res.json();
-
-      // Populate equipment
-      const equip = document.getElementById("equipment_id");
-      equip.innerHTML = '<option value="">— Select equipment —</option>';
-      masterData.equipment.forEach(e => {
-        equip.innerHTML += `<option value="${esc(e.id)}">${esc(e.id)} — ${esc(e.name)}</option>`;
-      });
-
-      // Populate shifts
-      const shiftSel = document.getElementById("shift");
-      shiftSel.innerHTML = '<option value="">— Select shift —</option>';
-      masterData.shifts.forEach(s => {
-        shiftSel.innerHTML += `<option value="${esc(s)}">${esc(s)}</option>`;
-      });
-    } catch (err) {
-      console.error("Failed to load master data:", err);
-    }
-  }
-
   function setCategory(cat) {
     document.getElementById("category").value = cat;
-
-    // Style buttons
-    const btnUnplanned = document.getElementById("btn-unplanned");
-    const btnPlanned   = document.getElementById("btn-planned");
+    const btnU = document.getElementById("btn-unplanned");
+    const btnP = document.getElementById("btn-planned");
     if (cat === "Unplanned") {
-      btnUnplanned.style.background = "#fef2f2";
-      btnUnplanned.style.borderColor = "#e94560";
-      btnPlanned.style.background   = "#fafbfc";
-      btnPlanned.style.borderColor  = "#dde1ea";
+      btnU.style.cssText = "padding:10px;border:1.5px solid #e94560;border-radius:8px;background:#fef2f2;cursor:pointer;font-weight:600;";
+      btnP.style.cssText = "padding:10px;border:1.5px solid #dde1ea;border-radius:8px;background:#fafbfc;cursor:pointer;font-weight:600;";
     } else {
-      btnPlanned.style.background    = "#f0f9ff";
-      btnPlanned.style.borderColor   = "#0284c7";
-      btnUnplanned.style.background  = "#fafbfc";
-      btnUnplanned.style.borderColor = "#dde1ea";
+      btnP.style.cssText = "padding:10px;border:1.5px solid #0284c7;border-radius:8px;background:#f0f9ff;cursor:pointer;font-weight:600;";
+      btnU.style.cssText = "padding:10px;border:1.5px solid #dde1ea;border-radius:8px;background:#fafbfc;cursor:pointer;font-weight:600;";
     }
-
-    // Filter reason dropdown by category
     const reasonSel = document.getElementById("reason");
-    reasonSel.innerHTML = '<option value="">— Select reason —</option>';
-    masterData.reasons
-      .filter(r => r.category === cat)
-      .forEach(r => {
-        reasonSel.innerHTML += `<option value="${esc(r.name)}">${esc(r.name)}</option>`;
-      });
+    reasonSel.innerHTML = '<option value="">Select reason</option>';
+    masterData.reasons.filter(r => r.category === cat).forEach(r => {
+      reasonSel.innerHTML += `<option value="${esc(r.name)}">${esc(r.name)}</option>`;
+    });
   }
 
-  // Handle form submission
   document.getElementById("downtime-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const btn   = document.getElementById("submit-btn");
     const toast = document.getElementById("toast");
-
     btn.disabled    = true;
     btn.textContent = "Saving...";
     toast.style.display = "none";
@@ -433,48 +443,36 @@
     };
 
     try {
-      const res  = await fetch("/api/submit", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify(payload),
-      });
+      const res  = await apiFetch("/api/submit", { method: "POST", body: JSON.stringify(payload) });
       const data = await res.json();
-
       if (res.ok) {
-        toast.className = "success";
-        toast.textContent = "✓ Record saved for " + (data.site || "site") + ". Great work!";
+        toast.className     = "success";
+        toast.textContent   = "Record saved for " + (data.site || "site");
         toast.style.display = "block";
-        // Reset form fields (keep operator name for convenience)
-        document.getElementById("equipment_id").value  = "";
-        document.getElementById("reason").value        = "";
-        document.getElementById("duration_minutes").value = "";
-        document.getElementById("notes").value         = "";
-        document.getElementById("category").value = "";
-        document.getElementById("shift").value    = "";
-        document.getElementById("btn-unplanned").style.background = "#fafbfc";
-        document.getElementById("btn-unplanned").style.borderColor = "#dde1ea";
-        document.getElementById("btn-planned").style.background   = "#fafbfc";
-        document.getElementById("btn-planned").style.borderColor  = "#dde1ea";
-        document.getElementById("reason").innerHTML = '<option value="">— Select category first —</option>';
+        document.getElementById("equipment_id").value      = "";
+        document.getElementById("reason").value            = "";
+        document.getElementById("duration_minutes").value  = "";
+        document.getElementById("notes").value             = "";
+        document.getElementById("category").value          = "";
+        document.getElementById("shift").value             = "";
+        document.getElementById("btn-unplanned").style.cssText =
+          "padding:10px;border:1.5px solid #dde1ea;border-radius:8px;background:#fafbfc;cursor:pointer;font-weight:600;";
+        document.getElementById("btn-planned").style.cssText =
+          "padding:10px;border:1.5px solid #dde1ea;border-radius:8px;background:#fafbfc;cursor:pointer;font-weight:600;";
+        document.getElementById("reason").innerHTML = '<option value="">Select category first</option>';
         loadRecords();
       } else {
         throw new Error(data.error || "Unknown error");
       }
     } catch (err) {
-      toast.className = "error";
-      toast.textContent = "✗ Failed to save: " + err.message;
+      toast.className     = "error";
+      toast.textContent   = "Failed to save: " + err.message;
       toast.style.display = "block";
     } finally {
       btn.disabled    = false;
       btn.textContent = "Submit Downtime Record";
     }
   });
-
-  // Init
-  loadSiteInfo();
-  loadRecords();
-  loadMasterData();
-  setInterval(loadRecords, 30000);
 </script>
 
 </body>
