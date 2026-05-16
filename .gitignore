@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+
+# Environment
+.env
+.env.local
+local.settings.json
+service-account-key.json
+*.json.key
+
+# Frontend
+node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env.production
+
+# GCP
+.gcloud/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Superpowers
+.superpowers/

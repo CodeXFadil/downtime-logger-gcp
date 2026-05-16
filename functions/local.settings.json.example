@@ -1,0 +1,9 @@
+{
+  "SITE_NAME": "Curtis Bay",
+  "REGION_KEY": "us-central",
+  "DB_HOST": "127.0.0.1",
+  "DB_NAME": "downtime-db",
+  "DB_USER": "downtime_app",
+  "DB_PASSWORD": "REPLACE_WITH_REAL_PASSWORD",
+  "GOOGLE_CLOUD_PROJECT": "grace-np-dl-develop"
+}
