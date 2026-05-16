@@ -1,0 +1,20 @@
+[
+  {"id": "PUMP-01",     "name": "Feed Pump",        "site": "Curtis Bay"},
+  {"id": "PUMP-02",     "name": "Discharge Pump",   "site": "Curtis Bay"},
+  {"id": "COMP-01",     "name": "Air Compressor",   "site": "Curtis Bay"},
+  {"id": "REACTOR-A",   "name": "Reactor Vessel A", "site": "Curtis Bay"},
+  {"id": "REACTOR-B",   "name": "Reactor Vessel B", "site": "Curtis Bay"},
+  {"id": "FILTER-01",   "name": "Process Filter",   "site": "Curtis Bay"},
+  {"id": "CONVEYOR-01", "name": "Feed Conveyor",    "site": "Curtis Bay"},
+  {"id": "DRYER-01",    "name": "Spray Dryer",      "site": "Curtis Bay"},
+  {"id": "HX-01",       "name": "Heat Exchanger",   "site": "Curtis Bay"},
+  {"id": "PUMP-01",     "name": "Feed Pump",        "site": "Kuantan"},
+  {"id": "PUMP-02",     "name": "Discharge Pump",   "site": "Kuantan"},
+  {"id": "COMP-01",     "name": "Air Compressor",   "site": "Kuantan"},
+  {"id": "REACTOR-A",   "name": "Reactor Vessel A", "site": "Kuantan"},
+  {"id": "REACTOR-B",   "name": "Reactor Vessel B", "site": "Kuantan"},
+  {"id": "FILTER-01",   "name": "Process Filter",   "site": "Kuantan"},
+  {"id": "CONVEYOR-01", "name": "Feed Conveyor",    "site": "Kuantan"},
+  {"id": "DRYER-01",    "name": "Spray Dryer",      "site": "Kuantan"},
+  {"id": "HX-01",       "name": "Heat Exchanger",   "site": "Kuantan"}
+]

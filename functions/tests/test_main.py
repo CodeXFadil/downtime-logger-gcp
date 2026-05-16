@@ -5,10 +5,7 @@ from unittest.mock import patch, MagicMock
 import flask
 import pytest
 
-os.environ.setdefault("DB_HOST",     "127.0.0.1")
-os.environ.setdefault("DB_NAME",     "downtime-db")
-os.environ.setdefault("DB_USER",     "testuser")
-os.environ.setdefault("DB_PASSWORD", "testpass")
+os.environ.setdefault("GCS_BUCKET",  "test-bucket")
 os.environ.setdefault("SITE_NAME",   "Curtis Bay")
 os.environ.setdefault("REGION_KEY",  "us-central")
 
@@ -25,58 +22,75 @@ def _req(method="GET", body=None, path="/"):
         return flask.request._get_current_object()
 
 
+def _mock_bucket():
+    """Return a MagicMock that stands in for storage.Client().bucket(...)."""
+    bucket = MagicMock()
+    client = MagicMock()
+    client.return_value.bucket.return_value = bucket
+    return client, bucket
+
+
 class TestHealth:
     def test_returns_200(self):
         from main import health
-        resp = health(_req())
-        assert resp.status_code == 200
+        assert health(_req()).status_code == 200
 
     def test_returns_site_name(self):
         from main import health
-        data = json.loads(health(_req()).get_data())
-        assert data["site"] == "Curtis Bay"
+        assert json.loads(health(_req()).get_data())["site"] == "Curtis Bay"
 
     def test_returns_healthy_status(self):
         from main import health
-        data = json.loads(health(_req()).get_data())
-        assert data["status"] == "healthy"
+        assert json.loads(health(_req()).get_data())["status"] == "healthy"
 
 
 class TestMasterData:
-    def _mock_conn(self, equipment_rows, reason_rows):
-        conn = MagicMock()
-        conn.run.side_effect = [equipment_rows, reason_rows]
-        return conn
+    def _setup_blobs(self, bucket, equipment, reasons):
+        blob = MagicMock()
+        blob.download_as_text.side_effect = [
+            json.dumps(equipment),
+            json.dumps(reasons),
+        ]
+        bucket.blob.return_value = blob
 
     def test_returns_equipment_for_site(self):
         from main import master_data
-        mock_conn = self._mock_conn(
-            [("PUMP-01", "Feed Pump")],
-            [("Mechanical Failure", "Unplanned")],
+        client, bucket = _mock_bucket()
+        self._setup_blobs(bucket,
+            [{"id": "PUMP-01", "name": "Feed Pump", "site": "Curtis Bay"},
+             {"id": "PUMP-01", "name": "Feed Pump", "site": "Kuantan"}],
+            [],
         )
-        with patch("main.get_db") as mock_get_db:
-            mock_get_db.return_value.__enter__ = lambda s: mock_conn
-            mock_get_db.return_value.__exit__ = MagicMock(return_value=False)
-            resp = master_data(_req())
-        assert resp.status_code == 200
-        data = json.loads(resp.get_data())
+        with patch("main.storage.Client", client):
+            data = json.loads(master_data(_req()).get_data())
         assert data["equipment"] == [{"id": "PUMP-01", "name": "Feed Pump"}]
+
+    def test_filters_equipment_by_site(self):
+        from main import master_data
+        client, bucket = _mock_bucket()
+        self._setup_blobs(bucket,
+            [{"id": "PUMP-01", "name": "Feed Pump", "site": "Curtis Bay"},
+             {"id": "PUMP-02", "name": "Other Pump", "site": "Kuantan"}],
+            [],
+        )
+        with patch("main.storage.Client", client):
+            data = json.loads(master_data(_req()).get_data())
+        assert len(data["equipment"]) == 1
+        assert data["equipment"][0]["id"] == "PUMP-01"
 
     def test_returns_shifts(self):
         from main import master_data
-        mock_conn = self._mock_conn([], [])
-        with patch("main.get_db") as mock_get_db:
-            mock_get_db.return_value.__enter__ = lambda s: mock_conn
-            mock_get_db.return_value.__exit__ = MagicMock(return_value=False)
-            resp = master_data(_req())
-        data = json.loads(resp.get_data())
+        client, bucket = _mock_bucket()
+        self._setup_blobs(bucket, [], [])
+        with patch("main.storage.Client", client):
+            data = json.loads(master_data(_req()).get_data())
         assert data["shifts"] == ["Morning", "Afternoon", "Night"]
 
-    def test_returns_500_on_db_error(self):
+    def test_returns_500_on_gcs_error(self):
         from main import master_data
-        with patch("main.get_db") as mock_get_db:
-            mock_get_db.return_value.__enter__ = MagicMock(side_effect=Exception("DB down"))
-            mock_get_db.return_value.__exit__ = MagicMock(return_value=False)
+        client = MagicMock()
+        client.return_value.bucket.side_effect = Exception("GCS down")
+        with patch("main.storage.Client", client):
             resp = master_data(_req())
         assert resp.status_code == 500
 
@@ -84,30 +98,34 @@ class TestMasterData:
 class TestRecords:
     def test_returns_200_with_empty_list(self):
         from main import records
-        mock_conn = MagicMock()
-        mock_conn.run.return_value = []
-        with patch("main.get_db") as mock_get_db:
-            mock_get_db.return_value.__enter__ = lambda s: mock_conn
-            mock_get_db.return_value.__exit__ = MagicMock(return_value=False)
+        client, bucket = _mock_bucket()
+        bucket.list_blobs.return_value = []
+        with patch("main.storage.Client", client):
             resp = records(_req())
         assert resp.status_code == 200
         assert json.loads(resp.get_data()) == []
 
-    def test_returns_500_on_db_error(self):
+    def test_returns_records_from_bucket(self):
         from main import records
-        with patch("main.get_db") as mock_get_db:
-            mock_get_db.return_value.__enter__ = MagicMock(side_effect=Exception("DB down"))
-            mock_get_db.return_value.__exit__ = MagicMock(return_value=False)
+        client, bucket = _mock_bucket()
+        blob = MagicMock()
+        blob.name = "records/us-central/2026-05-16T10-00-00-abc.json"
+        blob.download_as_text.return_value = json.dumps({"id": "abc", "site": "Curtis Bay"})
+        bucket.list_blobs.return_value = [blob]
+        with patch("main.storage.Client", client):
+            data = json.loads(records(_req()).get_data())
+        assert data == [{"id": "abc", "site": "Curtis Bay"}]
+
+    def test_returns_500_on_gcs_error(self):
+        from main import records
+        client = MagicMock()
+        client.return_value.bucket.side_effect = Exception("GCS down")
+        with patch("main.storage.Client", client):
             resp = records(_req())
         assert resp.status_code == 500
 
 
 class TestSubmit:
-    def _mock_conn(self, new_id=42):
-        conn = MagicMock()
-        conn.run.return_value = [[new_id]]
-        return conn
-
     def test_returns_400_if_equipment_id_missing(self):
         from main import submit
         resp = submit(_req("POST", {
@@ -138,10 +156,9 @@ class TestSubmit:
 
     def test_saves_record_and_returns_id(self):
         from main import submit
-        mock_conn = self._mock_conn(new_id=7)
-        with patch("main.get_db") as mock_get_db:
-            mock_get_db.return_value.__enter__ = lambda s: mock_conn
-            mock_get_db.return_value.__exit__ = MagicMock(return_value=False)
+        client, bucket = _mock_bucket()
+        bucket.blob.return_value.upload_from_string = MagicMock()
+        with patch("main.storage.Client", client):
             resp = submit(_req("POST", {
                 "equipment_id":     "PUMP-01",
                 "reason":           "Mechanical Failure",
@@ -153,18 +170,23 @@ class TestSubmit:
             }))
         assert resp.status_code == 200
         data = json.loads(resp.get_data())
-        assert data["id"] == 7
+        assert "id" in data
         assert data["site"] == "Curtis Bay"
 
-    def test_stamps_site_name_from_env(self):
+    def test_stamps_site_name(self):
         from main import submit
-        mock_conn = self._mock_conn()
-        with patch("main.get_db") as mock_get_db:
-            mock_get_db.return_value.__enter__ = lambda s: mock_conn
-            mock_get_db.return_value.__exit__ = MagicMock(return_value=False)
+        client, bucket = _mock_bucket()
+        uploaded = {}
+
+        def capture_upload(content, content_type=None):
+            uploaded["record"] = json.loads(content)
+
+        bucket.blob.return_value.upload_from_string = capture_upload
+        with patch("main.storage.Client", client):
             submit(_req("POST", {
-                "equipment_id": "PUMP-01", "reason": "Process Upset",
-                "duration_minutes": 10, "category": "Unplanned",
+                "equipment_id": "PUMP-01",
+                "reason": "Process Upset",
+                "duration_minutes": 10,
+                "category": "Unplanned",
             }))
-        call_kwargs = mock_conn.run.call_args[1]
-        assert call_kwargs["site"] == "Curtis Bay"
+        assert uploaded["record"]["site"] == "Curtis Bay"

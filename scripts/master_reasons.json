@@ -1,0 +1,14 @@
+[
+  {"name": "Mechanical Failure",         "category": "Unplanned"},
+  {"name": "Electrical Failure",         "category": "Unplanned"},
+  {"name": "Instrument / Control Fault", "category": "Unplanned"},
+  {"name": "Process Upset",              "category": "Unplanned"},
+  {"name": "Utility Failure",            "category": "Unplanned"},
+  {"name": "Safety / Emergency Stop",    "category": "Unplanned"},
+  {"name": "Raw Material Issue",         "category": "Unplanned"},
+  {"name": "Other",                      "category": "Unplanned"},
+  {"name": "Planned Maintenance",        "category": "Planned"},
+  {"name": "Scheduled Shutdown",         "category": "Planned"},
+  {"name": "Inspection / Regulatory",    "category": "Planned"},
+  {"name": "Trial / Commissioning",      "category": "Planned"}
+]
