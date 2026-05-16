@@ -333,7 +333,7 @@
         const high = r.duration_minutes >= 120;
         const ts = r.start_time ? r.start_time.replace("T", " ").substring(0, 16) : "";
         return `<tr>
-          <td><span class="site-tag">${esc(r.site_name)}</span></td>
+          <td><span class="site-tag">${esc(r.site)}</span></td>
           <td>${esc(r.equipment_id)}</td>
           <td>${esc(r.reason)}</td>
           <td><span class="duration-badge${high ? " high" : ""}">${esc(String(r.duration_minutes))} min</span></td>
@@ -458,7 +458,7 @@
         document.getElementById("reason").innerHTML = '<option value="">— Select category first —</option>';
         loadRecords();
       } else {
-        throw new Error(data.detail || "Unknown error");
+        throw new Error(data.error || "Unknown error");
       }
     } catch (err) {
       toast.className = "error";
