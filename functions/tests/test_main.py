@@ -14,6 +14,8 @@ os.environ.setdefault("REGION_KEY",  "us-central")
 
 _app = flask.Flask(__name__)
 
+_FAKE_USER = {"uid": "test-uid", "email": "operator@example.com"}
+
 
 def _req(method="GET", body=None, path="/"):
     with _app.test_request_context(
@@ -41,6 +43,12 @@ class TestHealth:
         data = json.loads(health(_req()).get_data())
         assert data["status"] == "healthy"
 
+    def test_handles_options_preflight(self):
+        from main import health
+        with _app.test_request_context(path="/", method="OPTIONS"):
+            resp = health(flask.request._get_current_object())
+        assert resp.status_code == 200
+
 
 class TestMasterData:
     def _mock_conn(self, equipment_rows, reason_rows):
@@ -48,13 +56,20 @@ class TestMasterData:
         conn.run.side_effect = [equipment_rows, reason_rows]
         return conn
 
+    def test_returns_401_without_token(self):
+        from main import master_data
+        with patch("main._verify_token", return_value=None):
+            resp = master_data(_req())
+        assert resp.status_code == 401
+
     def test_returns_equipment_for_site(self):
         from main import master_data
         mock_conn = self._mock_conn(
             [("PUMP-01", "Feed Pump")],
             [("Mechanical Failure", "Unplanned")],
         )
-        with patch("main.get_db") as mock_get_db:
+        with patch("main._verify_token", return_value=_FAKE_USER), \
+             patch("main.get_db") as mock_get_db:
             mock_get_db.return_value.__enter__ = lambda s: mock_conn
             mock_get_db.return_value.__exit__ = MagicMock(return_value=False)
             resp = master_data(_req())
@@ -65,7 +80,8 @@ class TestMasterData:
     def test_returns_shifts(self):
         from main import master_data
         mock_conn = self._mock_conn([], [])
-        with patch("main.get_db") as mock_get_db:
+        with patch("main._verify_token", return_value=_FAKE_USER), \
+             patch("main.get_db") as mock_get_db:
             mock_get_db.return_value.__enter__ = lambda s: mock_conn
             mock_get_db.return_value.__exit__ = MagicMock(return_value=False)
             resp = master_data(_req())
@@ -74,7 +90,8 @@ class TestMasterData:
 
     def test_returns_500_on_db_error(self):
         from main import master_data
-        with patch("main.get_db") as mock_get_db:
+        with patch("main._verify_token", return_value=_FAKE_USER), \
+             patch("main.get_db") as mock_get_db:
             mock_get_db.return_value.__enter__ = MagicMock(side_effect=Exception("DB down"))
             mock_get_db.return_value.__exit__ = MagicMock(return_value=False)
             resp = master_data(_req())
@@ -82,11 +99,18 @@ class TestMasterData:
 
 
 class TestRecords:
+    def test_returns_401_without_token(self):
+        from main import records
+        with patch("main._verify_token", return_value=None):
+            resp = records(_req())
+        assert resp.status_code == 401
+
     def test_returns_200_with_empty_list(self):
         from main import records
         mock_conn = MagicMock()
         mock_conn.run.return_value = []
-        with patch("main.get_db") as mock_get_db:
+        with patch("main._verify_token", return_value=_FAKE_USER), \
+             patch("main.get_db") as mock_get_db:
             mock_get_db.return_value.__enter__ = lambda s: mock_conn
             mock_get_db.return_value.__exit__ = MagicMock(return_value=False)
             resp = records(_req())
@@ -95,7 +119,8 @@ class TestRecords:
 
     def test_returns_500_on_db_error(self):
         from main import records
-        with patch("main.get_db") as mock_get_db:
+        with patch("main._verify_token", return_value=_FAKE_USER), \
+             patch("main.get_db") as mock_get_db:
             mock_get_db.return_value.__enter__ = MagicMock(side_effect=Exception("DB down"))
             mock_get_db.return_value.__exit__ = MagicMock(return_value=False)
             resp = records(_req())
@@ -108,38 +133,51 @@ class TestSubmit:
         conn.run.return_value = [[new_id]]
         return conn
 
+    def test_returns_401_without_token(self):
+        from main import submit
+        with patch("main._verify_token", return_value=None):
+            resp = submit(_req("POST", {
+                "equipment_id": "PUMP-01", "reason": "Mechanical Failure",
+                "duration_minutes": 30, "category": "Unplanned",
+            }))
+        assert resp.status_code == 401
+
     def test_returns_400_if_equipment_id_missing(self):
         from main import submit
-        resp = submit(_req("POST", {
-            "reason": "Mechanical Failure",
-            "duration_minutes": 30,
-            "category": "Unplanned",
-        }))
+        with patch("main._verify_token", return_value=_FAKE_USER):
+            resp = submit(_req("POST", {
+                "reason": "Mechanical Failure",
+                "duration_minutes": 30,
+                "category": "Unplanned",
+            }))
         assert resp.status_code == 400
 
     def test_returns_400_if_category_missing(self):
         from main import submit
-        resp = submit(_req("POST", {
-            "equipment_id": "PUMP-01",
-            "reason": "Mechanical Failure",
-            "duration_minutes": 30,
-        }))
+        with patch("main._verify_token", return_value=_FAKE_USER):
+            resp = submit(_req("POST", {
+                "equipment_id": "PUMP-01",
+                "reason": "Mechanical Failure",
+                "duration_minutes": 30,
+            }))
         assert resp.status_code == 400
 
     def test_returns_400_on_invalid_json(self):
         from main import submit
-        with _app.test_request_context(
-            path="/", method="POST",
-            data=b"not json",
-            content_type="application/json",
-        ):
-            resp = submit(flask.request._get_current_object())
+        with patch("main._verify_token", return_value=_FAKE_USER):
+            with _app.test_request_context(
+                path="/", method="POST",
+                data=b"not json",
+                content_type="application/json",
+            ):
+                resp = submit(flask.request._get_current_object())
         assert resp.status_code == 400
 
     def test_saves_record_and_returns_id(self):
         from main import submit
         mock_conn = self._mock_conn(new_id=7)
-        with patch("main.get_db") as mock_get_db:
+        with patch("main._verify_token", return_value=_FAKE_USER), \
+             patch("main.get_db") as mock_get_db:
             mock_get_db.return_value.__enter__ = lambda s: mock_conn
             mock_get_db.return_value.__exit__ = MagicMock(return_value=False)
             resp = submit(_req("POST", {
@@ -159,7 +197,8 @@ class TestSubmit:
     def test_stamps_site_name_from_env(self):
         from main import submit
         mock_conn = self._mock_conn()
-        with patch("main.get_db") as mock_get_db:
+        with patch("main._verify_token", return_value=_FAKE_USER), \
+             patch("main.get_db") as mock_get_db:
             mock_get_db.return_value.__enter__ = lambda s: mock_conn
             mock_get_db.return_value.__exit__ = MagicMock(return_value=False)
             submit(_req("POST", {

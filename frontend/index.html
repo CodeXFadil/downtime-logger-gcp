@@ -14,6 +14,54 @@
       min-height: 100vh;
     }
 
+    /* ---- Login Screen ---- */
+    #login-screen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    #login-screen.hidden { display: none; }
+    .login-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    .login-logo {
+      font-size: 32px;
+      font-weight: 800;
+      color: #e94560;
+      letter-spacing: -1px;
+    }
+    .login-tagline {
+      font-size: 14px;
+      color: #888;
+      margin-top: 4px;
+    }
+    .login-heading {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-top: 28px;
+      margin-bottom: 22px;
+    }
+    #login-error {
+      color: #721c24;
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 13px;
+      margin-bottom: 14px;
+      display: none;
+    }
+
     /* ---- Header ---- */
     header {
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -43,6 +91,27 @@
       font-size: 13px;
       font-weight: 600;
     }
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-left: auto;
+    }
+    .user-email {
+      font-size: 13px;
+      color: #a8b2d8;
+    }
+    .btn-logout {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-logout:hover { background: rgba(255,255,255,0.2); }
 
     /* ---- Layout ---- */
     .container {
@@ -202,12 +271,40 @@
 </head>
 <body>
 
+<!-- ========== LOGIN SCREEN ========== -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">W.R. Grace</div>
+    <div class="login-tagline">Plant Operations — Downtime Logger</div>
+    <div class="login-heading">Sign in to continue</div>
+    <form id="login-form">
+      <div class="form-group">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" placeholder="your.name@grace.com"
+               required autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" placeholder="••••••••"
+               required autocomplete="current-password" />
+      </div>
+      <div id="login-error"></div>
+      <button type="submit" class="btn-submit" id="login-btn">Sign In</button>
+    </form>
+  </div>
+</div>
+
+<!-- ========== MAIN APP ========== -->
 <header>
   <div>
     <div class="logo">W.R. Grace</div>
     <div class="tagline">Plant Operations — Downtime Logger</div>
   </div>
-  <div class="site-badge" id="site-badge">Loading...</div>
+  <span class="site-badge" id="site-badge">Loading...</span>
+  <div class="user-info">
+    <span class="user-email" id="user-email"></span>
+    <button class="btn-logout" id="logout-btn">Sign Out</button>
+  </div>
 </header>
 
 <div class="container">
@@ -304,11 +401,98 @@
 
 </div>
 
+<!-- Firebase SDK (compat — no build step needed) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
 <script>
-  // Show which site this Container App is serving (comes from SITE_NAME env var)
+  // ─── Firebase config ────────────────────────────────────────────────────────
+  // Get these values from Firebase Console → Project Settings → Your apps
+  const firebaseConfig = {
+    apiKey:    "REPLACE_WITH_YOUR_API_KEY",
+    authDomain: "grace-np-dl-develop.firebaseapp.com",
+    projectId:  "grace-np-dl-develop",
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  // ─── Auth-aware fetch ────────────────────────────────────────────────────────
+  async function authFetch(url, options = {}) {
+    const user = auth.currentUser;
+    const token = user ? await user.getIdToken() : null;
+    return fetch(url, {
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        ...(token ? { "Authorization": "Bearer " + token } : {}),
+      },
+    });
+  }
+
+  // ─── Auth state ──────────────────────────────────────────────────────────────
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      document.getElementById("login-screen").classList.add("hidden");
+      document.getElementById("user-email").textContent = user.email;
+      initApp();
+    } else {
+      document.getElementById("login-screen").classList.remove("hidden");
+    }
+  });
+
+  // ─── Login form ──────────────────────────────────────────────────────────────
+  document.getElementById("login-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    const btn = document.getElementById("login-btn");
+    const errEl = document.getElementById("login-error");
+    const email = document.getElementById("login-email").value.trim();
+    const password = document.getElementById("login-password").value;
+
+    btn.disabled = true;
+    btn.textContent = "Signing in...";
+    errEl.style.display = "none";
+
+    try {
+      await auth.signInWithEmailAndPassword(email, password);
+    } catch (err) {
+      errEl.textContent = _authError(err.code);
+      errEl.style.display = "block";
+      btn.disabled = false;
+      btn.textContent = "Sign In";
+    }
+  });
+
+  document.getElementById("logout-btn").addEventListener("click", () => {
+    auth.signOut();
+  });
+
+  function _authError(code) {
+    const map = {
+      "auth/user-not-found":    "No account found for this email.",
+      "auth/wrong-password":    "Incorrect password.",
+      "auth/invalid-email":     "Invalid email address.",
+      "auth/too-many-requests": "Too many failed attempts. Try again later.",
+      "auth/invalid-credential":"Invalid email or password.",
+    };
+    return map[code] || "Sign in failed. Please try again.";
+  }
+
+  // ─── App init (called once after successful login) ───────────────────────────
+  let _recordsTimer = null;
+
+  function initApp() {
+    loadSiteInfo();
+    loadRecords();
+    loadMasterData();
+    if (_recordsTimer) clearInterval(_recordsTimer);
+    _recordsTimer = setInterval(loadRecords, 30000);
+  }
+
+  // ─── Site info ───────────────────────────────────────────────────────────────
   async function loadSiteInfo() {
     try {
-      const res = await fetch("/api/health");
+      const res = await authFetch("/api/health");
       const data = await res.json();
       document.getElementById("site-badge").textContent =
         (data.site || "Unknown Site") + " (" + (data.region || "") + ")";
@@ -317,12 +501,13 @@
     }
   }
 
-  // Load recent records from /records endpoint
+  // ─── Records ─────────────────────────────────────────────────────────────────
   async function loadRecords() {
     const tbody = document.getElementById("records-body");
     tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Loading...</td></tr>';
     try {
-      const res = await fetch("/api/records");
+      const res = await authFetch("/api/records");
+      if (res.status === 401) { auth.signOut(); return; }
       if (!res.ok) throw new Error("HTTP " + res.status);
       const records = await res.json();
       if (records.length === 0) {
@@ -348,32 +533,22 @@
     }
   }
 
-  // Escape HTML to prevent XSS
-  function esc(s) {
-    return String(s)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-  }
-
-  // Master data loaded from /api/master-data on page load
+  // ─── Master data ─────────────────────────────────────────────────────────────
   let masterData = { equipment: [], reasons: [], shifts: [] };
 
   async function loadMasterData() {
     try {
-      const res = await fetch("/api/master-data");
+      const res = await authFetch("/api/master-data");
+      if (res.status === 401) { auth.signOut(); return; }
       if (!res.ok) throw new Error("HTTP " + res.status);
       masterData = await res.json();
 
-      // Populate equipment
       const equip = document.getElementById("equipment_id");
       equip.innerHTML = '<option value="">— Select equipment —</option>';
       masterData.equipment.forEach(e => {
         equip.innerHTML += `<option value="${esc(e.id)}">${esc(e.id)} — ${esc(e.name)}</option>`;
       });
 
-      // Populate shifts
       const shiftSel = document.getElementById("shift");
       shiftSel.innerHTML = '<option value="">— Select shift —</option>';
       masterData.shifts.forEach(s => {
@@ -384,10 +559,9 @@
     }
   }
 
+  // ─── Category toggle ─────────────────────────────────────────────────────────
   function setCategory(cat) {
     document.getElementById("category").value = cat;
-
-    // Style buttons
     const btnUnplanned = document.getElementById("btn-unplanned");
     const btnPlanned   = document.getElementById("btn-planned");
     if (cat === "Unplanned") {
@@ -401,8 +575,6 @@
       btnUnplanned.style.background  = "#fafbfc";
       btnUnplanned.style.borderColor = "#dde1ea";
     }
-
-    // Filter reason dropdown by category
     const reasonSel = document.getElementById("reason");
     reasonSel.innerHTML = '<option value="">— Select reason —</option>';
     masterData.reasons
@@ -412,8 +584,8 @@
       });
   }
 
-  // Handle form submission
-  document.getElementById("downtime-form").addEventListener("submit", async (e) => {
+  // ─── Form submit ─────────────────────────────────────────────────────────────
+  document.getElementById("downtime-form").addEventListener("submit", async e => {
     e.preventDefault();
     const btn   = document.getElementById("submit-btn");
     const toast = document.getElementById("toast");
@@ -433,28 +605,28 @@
     };
 
     try {
-      const res  = await fetch("/api/submit", {
+      const res  = await authFetch("/api/submit", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify(payload),
       });
+      if (res.status === 401) { auth.signOut(); return; }
       const data = await res.json();
 
       if (res.ok) {
         toast.className = "success";
         toast.textContent = "✓ Record saved for " + (data.site || "site") + ". Great work!";
         toast.style.display = "block";
-        // Reset form fields (keep operator name for convenience)
-        document.getElementById("equipment_id").value  = "";
-        document.getElementById("reason").value        = "";
+        document.getElementById("equipment_id").value     = "";
+        document.getElementById("reason").value           = "";
         document.getElementById("duration_minutes").value = "";
-        document.getElementById("notes").value         = "";
-        document.getElementById("category").value = "";
-        document.getElementById("shift").value    = "";
-        document.getElementById("btn-unplanned").style.background = "#fafbfc";
+        document.getElementById("notes").value            = "";
+        document.getElementById("category").value         = "";
+        document.getElementById("shift").value            = "";
+        document.getElementById("btn-unplanned").style.background  = "#fafbfc";
         document.getElementById("btn-unplanned").style.borderColor = "#dde1ea";
-        document.getElementById("btn-planned").style.background   = "#fafbfc";
-        document.getElementById("btn-planned").style.borderColor  = "#dde1ea";
+        document.getElementById("btn-planned").style.background    = "#fafbfc";
+        document.getElementById("btn-planned").style.borderColor   = "#dde1ea";
         document.getElementById("reason").innerHTML = '<option value="">— Select category first —</option>';
         loadRecords();
       } else {
@@ -470,11 +642,14 @@
     }
   });
 
-  // Init
-  loadSiteInfo();
-  loadRecords();
-  loadMasterData();
-  setInterval(loadRecords, 30000);
+  // ─── XSS escape ──────────────────────────────────────────────────────────────
+  function esc(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
 </script>
 
 </body>

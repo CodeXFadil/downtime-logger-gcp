@@ -1,3 +1,4 @@
 functions-framework==3.*
 pg8000==1.31.*
-firebase-admin==6.*
+PyJWT[crypto]==2.*
+requests==2.*
