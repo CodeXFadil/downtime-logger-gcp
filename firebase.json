@@ -1,28 +1,12 @@
 {
+  "storage": {
+    "rules": "storage.rules"
+  },
   "hosting": {
     "public": "frontend",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
-      {
-        "source": "/api/health",
-        "run": { "serviceId": "downtime-logger-health-us", "region": "us-central1" }
-      },
-      {
-        "source": "/api/master-data",
-        "run": { "serviceId": "downtime-logger-master-data-us", "region": "us-central1" }
-      },
-      {
-        "source": "/api/records",
-        "run": { "serviceId": "downtime-logger-records-us", "region": "us-central1" }
-      },
-      {
-        "source": "/api/submit",
-        "run": { "serviceId": "downtime-logger-submit-us", "region": "us-central1" }
-      },
-      {
-        "source": "/**",
-        "destination": "/index.html"
-      }
+      { "source": "/**", "destination": "/index.html" }
     ]
   }
 }

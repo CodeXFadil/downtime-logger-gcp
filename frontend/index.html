@@ -2,283 +2,140 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Plant Downtime Logger — W.R. Grace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+  <title>Downtime Logger — W.R. Grace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body, #root { height: 100%; }
+    body { overflow: hidden; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f0f2f5;
-      color: #1a1a2e;
-      min-height: 100vh;
-    }
-
-    /* ---- Login overlay ---- */
-    #login-overlay {
-      position: fixed; inset: 0;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 1000;
-    }
-    .login-card {
-      background: #fff; border-radius: 16px; padding: 48px 40px;
-      text-align: center; max-width: 400px; width: 90%;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-    }
-    .login-logo { font-size: 36px; font-weight: 800; color: #e94560; margin-bottom: 6px; }
-    .login-sub  { color: #888; font-size: 14px; margin-bottom: 8px; }
-    .login-desc { color: #aaa; font-size: 12px; margin-bottom: 32px; }
-    .google-btn {
-      display: flex; align-items: center; justify-content: center; gap: 12px;
-      width: 100%; padding: 14px; border: 1.5px solid #dde1ea; border-radius: 8px;
-      background: #fff; cursor: pointer; font-size: 15px; font-weight: 600;
-      color: #333; transition: background 0.2s; font-family: inherit;
-    }
-    .google-btn:hover   { background: #f8f8f8; }
-    .google-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    .google-btn img { width: 20px; height: 20px; }
-    .login-error { margin-top: 14px; color: #c0392b; font-size: 13px; }
-
-    /* ---- Header ---- */
-    header {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      color: #fff;
-      padding: 16px 32px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    }
-    header .logo    { font-size: 28px; font-weight: 800; letter-spacing: -1px; color: #e94560; }
-    header .tagline { font-size: 14px; color: #a8b2d8; }
-    header .right   { margin-left: auto; display: flex; align-items: center; gap: 12px; }
-    header .site-badge {
-      background: #e94560; color: #fff;
-      padding: 6px 16px; border-radius: 20px;
-      font-size: 13px; font-weight: 600;
-    }
-    header .user-info { font-size: 13px; color: #a8b2d8; }
-    .signout-btn {
-      background: none; border: 1px solid #a8b2d8; border-radius: 6px;
-      color: #a8b2d8; padding: 4px 12px; font-size: 12px; cursor: pointer;
-    }
-    .signout-btn:hover { background: rgba(255,255,255,0.1); }
-
-    /* ---- Layout ---- */
-    .container {
-      max-width: 1100px;
-      margin: 32px auto;
-      padding: 0 24px;
-      display: grid;
-      grid-template-columns: 1fr 1.4fr;
-      gap: 24px;
-    }
-    @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
-
-    /* ---- Card ---- */
-    .card {
-      background: #fff; border-radius: 12px; padding: 28px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-    }
-    .card h2 {
-      font-size: 18px; font-weight: 700; margin-bottom: 20px;
-      color: #1a1a2e; border-bottom: 2px solid #e94560; padding-bottom: 10px;
+    /* ── Design tokens ────────────────────────────────────────────── */
+    :root {
+      --accent:    #0B5FFF;
+      --accent-600:#0A52DD;
+      --accent-50: #EEF3FF;
+      --accent-100:#DCE6FF;
+      --ink-900:   #0F172A;
+      --ink-800:   #1E293B;
+      --ink-700:   #334155;
+      --ink-600:   #475569;
+      --ink-500:   #64748B;
+      --ink-400:   #94A3B8;
+      --ink-300:   #CBD5E1;
+      --ink-200:   #E2E8F0;
+      --ink-150:   #EDF1F6;
+      --ink-100:   #F1F5F9;
+      --ink-50:    #F8FAFC;
+      --paper:     #FFFFFF;
+      --danger:    #DC2626;
+      --danger-bg: #FEF2F2;
+      --warn:      #D97706;
+      --warn-bg:   #FFFBEB;
+      --ok:        #16A34A;
+      --ok-bg:     #F0FDF4;
+      --sh-1: 0 1px 2px rgba(15,23,42,.04), 0 1px 1px rgba(15,23,42,.03);
+      --sh-2: 0 4px 16px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
+      --sh-3: 0 12px 32px rgba(15,23,42,.10), 0 2px 6px rgba(15,23,42,.05);
+      --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 24px;
+      --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
     }
 
-    /* ---- Form ---- */
-    .form-group { margin-bottom: 18px; }
-    label {
-      display: block; font-size: 13px; font-weight: 600; color: #555;
-      margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;
+    .gx, .gx * { box-sizing: border-box; }
+    .gx {
+      font-family: var(--font);
+      color: var(--ink-900);
+      background: var(--ink-50);
+      width: 100%; height: 100%;
+      font-feature-settings: "ss01", "cv11";
+      -webkit-font-smoothing: antialiased;
+      letter-spacing: -0.005em;
     }
-    input, select, textarea {
-      width: 100%; padding: 10px 14px; border: 1.5px solid #dde1ea;
-      border-radius: 8px; font-size: 15px; color: #1a1a2e; background: #fafbfc;
-      transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+    .gx .num, .gx .time, .gx .dur, .gx .id {
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum";
     }
-    input:focus, select:focus, textarea:focus {
-      border-color: #e94560; box-shadow: 0 0 0 3px rgba(233,69,96,0.12); background: #fff;
-    }
-    textarea { resize: vertical; min-height: 80px; }
 
-    .btn-submit {
-      width: 100%; padding: 13px;
-      background: linear-gradient(135deg, #e94560, #c0392b);
-      color: #fff; border: none; border-radius: 8px; font-size: 16px;
-      font-weight: 700; cursor: pointer; transition: opacity 0.2s, transform 0.1s;
-      letter-spacing: 0.3px;
+    /* Buttons */
+    .gx-btn {
+      appearance: none; border: none; font-family: inherit; font-weight: 600;
+      letter-spacing: -0.01em; cursor: pointer; display: inline-flex;
+      align-items: center; justify-content: center; gap: 10px;
+      border-radius: var(--r-md);
+      transition: background .12s, box-shadow .12s, transform .04s;
+      white-space: nowrap; user-select: none;
     }
-    .btn-submit:hover    { opacity: 0.9; }
-    .btn-submit:active   { transform: scale(0.99); }
-    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+    .gx-btn:active { transform: translateY(1px); }
+    .gx-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+    .gx-btn--primary  { background: var(--accent); color: white; box-shadow: var(--sh-1); }
+    .gx-btn--primary:not(:disabled):hover { background: var(--accent-600); }
+    .gx-btn--secondary { background: var(--paper); color: var(--ink-800); border: 1px solid var(--ink-200); box-shadow: var(--sh-1); }
+    .gx-btn--secondary:hover { background: var(--ink-50); }
+    .gx-btn--ghost { background: transparent; color: var(--ink-700); }
+    .gx-btn--ghost:hover { background: var(--ink-100); }
+    .gx-btn--lg { height: 64px; padding: 0 28px; font-size: 18px; }
+    .gx-btn--md { height: 56px; padding: 0 22px; font-size: 16px; }
+    .gx-btn--sm { height: 44px; padding: 0 16px; font-size: 14px; }
 
-    /* ---- Toast ---- */
-    #toast {
-      display: none; margin-top: 14px; padding: 12px 16px;
-      border-radius: 8px; font-size: 14px; font-weight: 600;
+    /* Inputs */
+    .gx-field {
+      width: 100%; height: 56px; padding: 0 16px;
+      border: 1.5px solid var(--ink-200); border-radius: var(--r-md);
+      background: var(--paper); font: inherit; font-size: 15px; color: var(--ink-900);
+      outline: none; transition: border-color .12s, box-shadow .12s;
     }
-    #toast.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-    #toast.error   { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .gx-field:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-100); }
+    .gx-label {
+      display: block; font-size: 12px; font-weight: 600; color: var(--ink-600);
+      text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;
+    }
 
-    /* ---- Records table ---- */
-    .table-wrapper { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th {
-      background: #f0f2f5; padding: 10px 12px; text-align: left;
-      font-weight: 700; color: #555; text-transform: uppercase;
-      letter-spacing: 0.4px; border-bottom: 2px solid #dde1ea;
-    }
-    td { padding: 10px 12px; border-bottom: 1px solid #f0f2f5; vertical-align: top; }
-    tr:hover td { background: #fafbfc; }
+    /* Cards */
+    .gx-card { background: var(--paper); border: 1px solid var(--ink-200); border-radius: var(--r-lg); box-shadow: var(--sh-1); }
 
-    .site-tag {
-      display: inline-block; padding: 2px 10px; border-radius: 12px;
-      font-size: 11px; font-weight: 700; background: #1a1a2e; color: #e94560;
+    /* TopBar */
+    .gx-topbar {
+      height: 60px; background: var(--paper); border-bottom: 1px solid var(--ink-200);
+      display: flex; align-items: center; padding: 0 24px; gap: 16px; flex-shrink: 0;
     }
-    .duration-badge {
-      display: inline-block; padding: 2px 10px; border-radius: 12px;
-      font-size: 12px; font-weight: 700; background: #fff3cd; color: #856404;
-    }
-    .duration-badge.high { background: #f8d7da; color: #721c24; }
 
-    .refresh-btn {
-      background: none; border: 1.5px solid #dde1ea; border-radius: 8px;
-      padding: 6px 14px; font-size: 13px; cursor: pointer; color: #555;
-      float: right; margin-top: -4px;
-    }
-    .refresh-btn:hover { background: #f0f2f5; }
+    /* Scrollbars */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--ink-200); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--ink-300); }
 
-    .empty-state { text-align: center; padding: 32px; color: #aaa; font-size: 14px; }
+    /* Spinner */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 3px solid var(--accent-100); border-top-color: var(--accent);
+      animation: spin 0.7s linear infinite;
+    }
+
+    /* details/summary marker reset */
+    details > summary { list-style: none; }
+    details > summary::-webkit-details-marker { display: none; }
   </style>
 </head>
 <body>
-
-<!-- Login overlay -->
-<div id="login-overlay">
-  <div class="login-card">
-    <div class="login-logo">W.R. Grace</div>
-    <div class="login-sub">Plant Operations — Downtime Logger</div>
-    <div class="login-desc">Sign in with your corporate Google account to continue</div>
-    <button class="google-btn" id="google-btn" onclick="signIn()">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-      Sign in with Google
-    </button>
-    <div class="login-error" id="login-error"></div>
-  </div>
-</div>
-
-<header>
-  <div>
-    <div class="logo">W.R. Grace</div>
-    <div class="tagline">Plant Operations — Downtime Logger</div>
-  </div>
-  <div class="right">
-    <span class="user-info" id="user-name"></span>
-    <button class="signout-btn" onclick="signOut()">Sign out</button>
-    <div class="site-badge" id="site-badge">Loading...</div>
-  </div>
-</header>
-
-<div class="container">
-
-  <!-- LEFT: Submission Form -->
-  <div class="card">
-    <h2>Log Downtime Incident</h2>
-    <form id="downtime-form">
-
-      <div class="form-group">
-        <label for="equipment_id">Equipment</label>
-        <select id="equipment_id" required>
-          <option value="">Loading...</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Downtime Type</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-          <button type="button" id="btn-unplanned" onclick="setCategory('Unplanned')"
-            style="padding:10px;border:1.5px solid #dde1ea;border-radius:8px;background:#fafbfc;cursor:pointer;font-weight:600;">
-            Unplanned
-          </button>
-          <button type="button" id="btn-planned" onclick="setCategory('Planned')"
-            style="padding:10px;border:1.5px solid #dde1ea;border-radius:8px;background:#fafbfc;cursor:pointer;font-weight:600;">
-            Planned
-          </button>
-        </div>
-        <input type="hidden" id="category" />
-      </div>
-
-      <div class="form-group">
-        <label for="reason">Reason for Downtime</label>
-        <select id="reason" required>
-          <option value="">Select category first</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="duration_minutes">Duration (minutes)</label>
-        <input type="number" id="duration_minutes" min="1" max="9999" placeholder="e.g. 45" required />
-      </div>
-
-      <div class="form-group">
-        <label for="shift">Shift</label>
-        <select id="shift">
-          <option value="">Select shift</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="operator_name">Operator Name</label>
-        <input type="text" id="operator_name" placeholder="Your name" />
-      </div>
-
-      <div class="form-group">
-        <label for="notes">Notes (optional)</label>
-        <textarea id="notes" placeholder="Root cause, actions taken, parts replaced..."></textarea>
-      </div>
-
-      <button type="submit" class="btn-submit" id="submit-btn">
-        Submit Downtime Record
-      </button>
-
-      <div id="toast"></div>
-    </form>
-  </div>
-
-  <!-- RIGHT: Recent Records -->
-  <div class="card">
-    <h2>
-      Recent Incidents
-      <button class="refresh-btn" onclick="loadRecords()">Refresh</button>
-    </h2>
-    <div class="table-wrapper">
-      <table id="records-table">
-        <thead>
-          <tr>
-            <th>Site</th>
-            <th>Equipment</th>
-            <th>Reason</th>
-            <th>Duration</th>
-            <th>Time (UTC)</th>
-            <th>Operator</th>
-          </tr>
-        </thead>
-        <tbody id="records-body">
-          <tr><td colspan="6" class="empty-state">Sign in to view records</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-</div>
+<div id="root"></div>
 
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+
+<!-- React + Babel -->
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
 <script>
-  // Firebase config
+  /* ── Firebase init (vanilla, before React) ────────────────────── */
   firebase.initializeApp({
     apiKey:            "AIzaSyAe04FJ0fE7Bq1mUoxx6uuGi_Cl_dKzgNY",
     authDomain:        "grace-np-dl-develop.firebaseapp.com",
@@ -287,193 +144,976 @@
     messagingSenderId: "478659741502",
     appId:             "1:478659741502:web:4aec195a42419d88ed8e6f"
   });
+  const _auth    = firebase.auth();
+  const _storage = firebase.storage();
+  const _BUCKET  = "grace-np-dl-develop.firebasestorage.app";
 
-  const auth     = firebase.auth();
-  const provider = new firebase.auth.GoogleAuthProvider();
-  let   googleToken = null;
-
-  // ---- Auth ----
-
-  async function signIn() {
-    const btn = document.getElementById("google-btn");
-    const err = document.getElementById("login-error");
-    btn.disabled = true;
-    btn.textContent = "Signing in...";
-    err.textContent = "";
-    try {
-      const result     = await auth.signInWithPopup(provider);
-      const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
-      googleToken      = credential.idToken;
-      onSignedIn(result.user);
-    } catch (e) {
-      err.textContent = "Sign-in failed: " + e.message;
-      btn.disabled    = false;
-      btn.innerHTML   = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> Sign in with Google';
-    }
+  async function fbToken() {
+    return _auth.currentUser ? _auth.currentUser.getIdToken() : null;
   }
-
-  function onSignedIn(user) {
-    document.getElementById("login-overlay").style.display = "none";
-    document.getElementById("user-name").textContent       = user.displayName || user.email;
-    loadSiteInfo();
-    loadRecords();
-    loadMasterData();
-    setInterval(loadRecords, 30000);
+  async function storageRead(path) {
+    const token   = await fbToken();
+    const encoded = path.split("/").map(encodeURIComponent).join("%2F");
+    const resp    = await fetch(
+      `https://firebasestorage.googleapis.com/v0/b/${_BUCKET}/o/${encoded}?alt=media`,
+      { headers: { Authorization: `Firebase ${token}` } }
+    );
+    if (!resp.ok) throw new Error(`${resp.status} reading ${path}`);
+    return resp.json();
   }
-
-  async function signOut() {
-    await auth.signOut();
-    googleToken = null;
-    document.getElementById("login-overlay").style.display = "flex";
-    document.getElementById("records-body").innerHTML =
-      '<tr><td colspan="6" class="empty-state">Sign in to view records</td></tr>';
-    document.getElementById("site-badge").textContent = "Loading...";
+  async function storageList(prefix) {
+    const token = await fbToken();
+    const resp  = await fetch(
+      `https://firebasestorage.googleapis.com/v0/b/${_BUCKET}/o?prefix=${encodeURIComponent(prefix + "/")}`,
+      { headers: { Authorization: `Firebase ${token}` } }
+    );
+    if (!resp.ok) throw new Error(`${resp.status} listing ${prefix}`);
+    const d = await resp.json();
+    return (d.items || []).map(item => item.name);
   }
-
-  // ---- Authenticated fetch ----
-
-  async function apiFetch(path, options = {}) {
-    if (!googleToken) throw new Error("Not signed in");
-    const headers = { "Authorization": "Bearer " + googleToken, "Content-Type": "application/json" };
-    return fetch(path, { ...options, headers });
+  function siteToRegion(site) {
+    return site.toLowerCase().replace(/\s+/g, "-");
   }
-
-  // ---- App logic ----
-
-  function esc(s) {
-    return String(s || "")
-      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-  }
-
-  async function loadSiteInfo() {
-    try {
-      const data = await apiFetch("/api/health").then(r => r.json());
-      document.getElementById("site-badge").textContent =
-        (data.site || "Unknown") + " (" + (data.region || "") + ")";
-    } catch { document.getElementById("site-badge").textContent = "Offline"; }
-  }
-
-  let masterData = { equipment: [], reasons: [], shifts: [] };
-
-  async function loadMasterData() {
-    try {
-      const res = await apiFetch("/api/master-data");
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      masterData = await res.json();
-
-      const equip = document.getElementById("equipment_id");
-      equip.innerHTML = '<option value="">Select equipment</option>';
-      masterData.equipment.forEach(e => {
-        equip.innerHTML += `<option value="${esc(e.id)}">${esc(e.id)} - ${esc(e.name)}</option>`;
-      });
-
-      const shiftSel = document.getElementById("shift");
-      shiftSel.innerHTML = '<option value="">Select shift</option>';
-      masterData.shifts.forEach(s => {
-        shiftSel.innerHTML += `<option value="${esc(s)}">${esc(s)}</option>`;
-      });
-    } catch (err) { console.error("Failed to load master data:", err); }
-  }
-
-  async function loadRecords() {
-    const tbody = document.getElementById("records-body");
-    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Loading...</td></tr>';
-    try {
-      const res     = await apiFetch("/api/records");
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      const records = await res.json();
-      if (records.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No records yet. Submit your first downtime incident!</td></tr>';
-        return;
-      }
-      tbody.innerHTML = records.map(r => {
-        const high = r.duration_minutes >= 120;
-        const ts   = r.start_time ? r.start_time.replace("T", " ").substring(0, 16) : "";
-        return `<tr>
-          <td><span class="site-tag">${esc(r.site)}</span></td>
-          <td>${esc(r.equipment_id)}</td>
-          <td>${esc(r.reason)}</td>
-          <td><span class="duration-badge${high ? " high" : ""}">${esc(String(r.duration_minutes))} min</span></td>
-          <td style="font-size:12px;color:#888;">${esc(ts)}</td>
-          <td>${esc(r.operator_name)}</td>
-        </tr>`;
-      }).join("");
-    } catch (err) {
-      tbody.innerHTML = `<tr><td colspan="6" class="empty-state" style="color:#c0392b;">
-        Could not load records: ${esc(err.message)}
-      </td></tr>`;
-    }
-  }
-
-  function setCategory(cat) {
-    document.getElementById("category").value = cat;
-    const btnU = document.getElementById("btn-unplanned");
-    const btnP = document.getElementById("btn-planned");
-    if (cat === "Unplanned") {
-      btnU.style.cssText = "padding:10px;border:1.5px solid #e94560;border-radius:8px;background:#fef2f2;cursor:pointer;font-weight:600;";
-      btnP.style.cssText = "padding:10px;border:1.5px solid #dde1ea;border-radius:8px;background:#fafbfc;cursor:pointer;font-weight:600;";
-    } else {
-      btnP.style.cssText = "padding:10px;border:1.5px solid #0284c7;border-radius:8px;background:#f0f9ff;cursor:pointer;font-weight:600;";
-      btnU.style.cssText = "padding:10px;border:1.5px solid #dde1ea;border-radius:8px;background:#fafbfc;cursor:pointer;font-weight:600;";
-    }
-    const reasonSel = document.getElementById("reason");
-    reasonSel.innerHTML = '<option value="">Select reason</option>';
-    masterData.reasons.filter(r => r.category === cat).forEach(r => {
-      reasonSel.innerHTML += `<option value="${esc(r.name)}">${esc(r.name)}</option>`;
-    });
-  }
-
-  document.getElementById("downtime-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const btn   = document.getElementById("submit-btn");
-    const toast = document.getElementById("toast");
-    btn.disabled    = true;
-    btn.textContent = "Saving...";
-    toast.style.display = "none";
-
-    const payload = {
-      equipment_id:     document.getElementById("equipment_id").value,
-      reason:           document.getElementById("reason").value,
-      duration_minutes: parseInt(document.getElementById("duration_minutes").value, 10),
-      category:         document.getElementById("category").value,
-      shift:            document.getElementById("shift").value,
-      operator_name:    document.getElementById("operator_name").value,
-      notes:            document.getElementById("notes").value,
-    };
-
-    try {
-      const res  = await apiFetch("/api/submit", { method: "POST", body: JSON.stringify(payload) });
-      const data = await res.json();
-      if (res.ok) {
-        toast.className     = "success";
-        toast.textContent   = "Record saved for " + (data.site || "site");
-        toast.style.display = "block";
-        document.getElementById("equipment_id").value      = "";
-        document.getElementById("reason").value            = "";
-        document.getElementById("duration_minutes").value  = "";
-        document.getElementById("notes").value             = "";
-        document.getElementById("category").value          = "";
-        document.getElementById("shift").value             = "";
-        document.getElementById("btn-unplanned").style.cssText =
-          "padding:10px;border:1.5px solid #dde1ea;border-radius:8px;background:#fafbfc;cursor:pointer;font-weight:600;";
-        document.getElementById("btn-planned").style.cssText =
-          "padding:10px;border:1.5px solid #dde1ea;border-radius:8px;background:#fafbfc;cursor:pointer;font-weight:600;";
-        document.getElementById("reason").innerHTML = '<option value="">Select category first</option>';
-        loadRecords();
-      } else {
-        throw new Error(data.error || "Unknown error");
-      }
-    } catch (err) {
-      toast.className     = "error";
-      toast.textContent   = "Failed to save: " + err.message;
-      toast.style.display = "block";
-    } finally {
-      btn.disabled    = false;
-      btn.textContent = "Submit Downtime Record";
-    }
-  });
 </script>
 
+<script type="text/babel">
+  const { useState, useEffect, useRef, useCallback } = React;
+
+  /* ── Icons ───────────────────────────────────────────────────────── */
+
+  const Icon = ({ size = 24, stroke = 2, fill = 'none', children, style }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor"
+         strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round"
+         style={{ flexShrink: 0, ...style }}>
+      {children}
+    </svg>
+  );
+
+  const IC = {
+    Check:        p => <Icon {...p}><path d="M5 12l5 5 9-11"/></Icon>,
+    CheckCircle:  p => <Icon {...p}><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></Icon>,
+    X:            p => <Icon {...p}><path d="M5 5l14 14M19 5L5 19"/></Icon>,
+    Info:         p => <Icon {...p}><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.5"/></Icon>,
+    Search:       p => <Icon {...p}><circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5"/></Icon>,
+    ChevronDown:  p => <Icon {...p}><path d="M6 9l6 6 6-6"/></Icon>,
+    ChevronRight: p => <Icon {...p}><path d="M9 6l6 6-6 6"/></Icon>,
+    Plus:         p => <Icon {...p}><path d="M12 5v14M5 12h14"/></Icon>,
+    ArrowRight:   p => <Icon {...p}><path d="M5 12h14M14 6l6 6-6 6"/></Icon>,
+    ArrowLeft:    p => <Icon {...p}><path d="M19 12H5M10 6l-6 6 6 6"/></Icon>,
+    List:         p => <Icon {...p}><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></Icon>,
+    Clock:        p => <Icon {...p}><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></Icon>,
+    Timer:        p => <Icon {...p}><path d="M12 5a8 8 0 1 0 8 8"/><path d="M9 2h6M12 5v3M19 5l1.5-1.5"/></Icon>,
+    Wifi:         p => <Icon {...p}><path d="M2 9a16 16 0 0 1 20 0M5 12.5a11 11 0 0 1 14 0M8.5 16a6 6 0 0 1 7 0"/><circle cx="12" cy="20" r="0.5" fill="currentColor"/></Icon>,
+    Building:     p => <Icon {...p}><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 7h.01M15 7h.01M9 11h.01M15 11h.01M9 15h.01M15 15h.01M10 21v-4h4v4"/></Icon>,
+    History:      p => <Icon {...p}><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 8v4l3 2"/></Icon>,
+    Logout:       p => <Icon {...p}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></Icon>,
+    User:         p => <Icon {...p}><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></Icon>,
+  };
+
+  /* ── Downtime categories ─────────────────────────────────────────── */
+
+  const CATS = [
+    { id: 'unp-maint', label: 'Unplanned Maintenance', color: '#DC2626', bg: '#FEF2F2', planned: false,
+      desc: 'Equipment failure, breakdown, or unscheduled repair.' },
+    { id: 'pln-maint', label: 'Planned Maintenance',   color: '#0F766E', bg: '#EFFCFA', planned: true,
+      desc: 'Scheduled PM, inspection, or shutdown work.' },
+    { id: 'unp-proc',  label: 'Unplanned Process',     color: '#B45309', bg: '#FFFBEB', planned: false,
+      desc: 'Process upset, off-spec product, upstream loss.' },
+    { id: 'pln-proc',  label: 'Planned Process',       color: '#0B5FFF', bg: '#EEF3FF', planned: true,
+      desc: 'Planned grade change, rate cut, scheduled idle.' },
+    { id: 'inv-ctrl',  label: 'Inventory Control',     color: '#7C3AED', bg: '#F5F3FF', planned: true,
+      desc: 'Tank full, no feed, raw material outage.' },
+  ];
+
+  /* ── Searchable Dropdown ─────────────────────────────────────────── */
+
+  function Dropdown({ value, valueLabel, valueSub, options, placeholder, onChange }) {
+    const [open, setOpen] = useState(false);
+    const [q, setQ]       = useState('');
+    const ref             = useRef(null);
+
+    useEffect(() => {
+      const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+      document.addEventListener('mousedown', handler);
+      return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    const filtered = options.filter(o => {
+      if (!q) return true;
+      return (o.label + ' ' + (o.code || '')).toLowerCase().includes(q.toLowerCase());
+    });
+
+    return (
+      <div ref={ref} style={{ position: 'relative' }}>
+        <button onClick={() => setOpen(s => !s)} style={{
+          width: '100%', textAlign: 'left', cursor: 'pointer', height: 56, padding: '0 14px',
+          border: `1.5px solid ${open ? 'var(--accent)' : 'var(--ink-200)'}`,
+          borderRadius: 'var(--r-md)', background: 'var(--paper)',
+          display: 'flex', alignItems: 'center', gap: 10,
+          boxShadow: open ? '0 0 0 3px var(--accent-100)' : 'none',
+          transition: 'border-color .12s, box-shadow .12s',
+        }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {valueLabel
+              ? <>
+                  <div style={{ fontSize: 14, fontWeight: 700, lineHeight: 1.1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{valueLabel}</div>
+                  {valueSub && <div style={{ fontSize: 11, color: 'var(--ink-500)', marginTop: 2 }}>{valueSub}</div>}
+                </>
+              : <div style={{ fontSize: 14, color: 'var(--ink-400)' }}>{placeholder || 'Select…'}</div>
+            }
+          </div>
+          <IC.ChevronDown size={17} style={{ color: 'var(--ink-500)', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }}/>
+        </button>
+
+        {open && (
+          <div style={{
+            position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 200,
+            background: 'var(--paper)', border: '1px solid var(--ink-200)',
+            borderRadius: 'var(--r-md)', boxShadow: 'var(--sh-3)',
+            maxHeight: 300, display: 'flex', flexDirection: 'column', overflow: 'hidden',
+          }}>
+            <div style={{ position: 'relative', padding: 8, borderBottom: '1px solid var(--ink-150)' }}>
+              <input autoFocus value={q} onChange={e => setQ(e.target.value)}
+                placeholder={`Search… (${filtered.length} / ${options.length})`}
+                className="gx-field"
+                style={{ paddingLeft: 34, height: 36, fontSize: 13 }}/>
+              <IC.Search size={14} style={{ position: 'absolute', left: 20, top: 19, color: 'var(--ink-400)' }}/>
+            </div>
+            <div style={{ overflowY: 'auto', flex: 1 }}>
+              {filtered.length === 0
+                ? <div style={{ padding: 20, textAlign: 'center', color: 'var(--ink-500)', fontSize: 13 }}>No matches</div>
+                : filtered.map(o => {
+                    const sel = o.value === value;
+                    return (
+                      <button key={o.value} onClick={() => { onChange(o); setOpen(false); setQ(''); }} style={{
+                        width: '100%', textAlign: 'left', cursor: 'pointer', padding: '10px 14px',
+                        background: sel ? 'var(--accent-50)' : 'transparent', border: 'none',
+                        borderBottom: '1px solid var(--ink-150)', display: 'flex', alignItems: 'center', gap: 10,
+                      }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          {o.code && <span className="id" style={{ fontSize: 11, fontWeight: 700, color: sel ? 'var(--accent-600)' : 'var(--ink-500)', marginRight: 8 }}>{o.code}</span>}
+                          <span style={{ fontSize: 14, fontWeight: 600 }}>{o.label}</span>
+                        </div>
+                        {sel && <IC.Check size={15} stroke={3} style={{ color: 'var(--accent-600)' }}/>}
+                      </button>
+                    );
+                  })
+              }
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /* ── TopBar ──────────────────────────────────────────────────────── */
+
+  function TopBar({ back, plant, user, onSignOut }) {
+    return (
+      <div className="gx-topbar">
+        {back && (
+          <button className="gx-btn gx-btn--ghost gx-btn--sm" onClick={back} style={{ marginLeft: -8, gap: 6 }}>
+            <IC.ArrowLeft size={18}/> Back
+          </button>
+        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{
+            width: 34, height: 34, borderRadius: 8, background: 'var(--ink-900)', color: 'white',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 13,
+          }}>G</div>
+          <div style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.1 }}>Downtime Logger</div>
+        </div>
+        <div style={{ flex: 1 }}/>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, color: 'var(--ink-600)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 500 }}>
+            <IC.Wifi size={14}/> Online
+          </div>
+          {plant && <>
+            <div style={{ width: 1, height: 18, background: 'var(--ink-200)' }}/>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 500 }}>
+              <IC.Building size={14}/> {plant}
+            </div>
+          </>}
+          {user && <>
+            <div style={{ width: 1, height: 18, background: 'var(--ink-200)' }}/>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{
+                width: 30, height: 30, borderRadius: 15, background: 'var(--accent-100)',
+                color: 'var(--accent-600)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontWeight: 700, fontSize: 11, flexShrink: 0,
+              }}>{user.initials}</div>
+              <span style={{ fontSize: 12, fontWeight: 500 }}>{user.name}</span>
+            </div>
+            {onSignOut && (
+              <button className="gx-btn gx-btn--ghost gx-btn--sm" onClick={onSignOut}
+                style={{ height: 36, width: 36, padding: 0, borderRadius: 8 }} title="Sign out">
+                <IC.Logout size={16}/>
+              </button>
+            )}
+          </>}
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Login screen ────────────────────────────────────────────────── */
+
+  function LoginScreen({ onSignIn }) {
+    const [loading, setLoading] = useState(false);
+    const [error, setError]     = useState('');
+
+    async function handleSignIn() {
+      setLoading(true); setError('');
+      try {
+        await _auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+      } catch (e) {
+        setError(e.message);
+        setLoading(false);
+      }
+    }
+
+    return (
+      <div className="gx" style={{ height: '100%', display: 'flex' }}>
+        {/* Brand panel */}
+        <div style={{
+          width: 420, flexShrink: 0,
+          background: 'linear-gradient(155deg, var(--ink-900) 0%, var(--ink-800) 100%)',
+          color: 'white', padding: '52px 48px', display: 'flex', flexDirection: 'column',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 42, height: 42, borderRadius: 10, background: 'white', color: 'var(--ink-900)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 19 }}>G</div>
+            <div>
+              <div style={{ fontSize: 17, fontWeight: 700, letterSpacing: '0.02em' }}>GRACE</div>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,.45)', letterSpacing: '0.18em', textTransform: 'uppercase' }}>Plant Operations</div>
+            </div>
+          </div>
+          <div style={{ flex: 1 }}/>
+          <div style={{ fontSize: 34, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 14 }}>
+            Downtime Logger
+          </div>
+          <div style={{ fontSize: 15, color: 'rgba(255,255,255,.65)', lineHeight: 1.6, marginBottom: 36 }}>
+            Capture every minute of unplanned stop. Fast, repeatable, plant‑floor ready.
+          </div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,.35)' }}>W.R. Grace &amp; Co. · Plant Operations</div>
+        </div>
+
+        {/* Sign-in panel */}
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 48 }}>
+          <div style={{ width: 360 }}>
+            <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.02em' }}>Sign in</div>
+            <div style={{ fontSize: 14, color: 'var(--ink-500)', marginTop: 6, marginBottom: 32 }}>
+              Use your Grace corporate Google account.
+            </div>
+
+            <button onClick={handleSignIn} disabled={loading} style={{
+              width: '100%', height: 58, border: '1.5px solid var(--ink-200)', borderRadius: 'var(--r-md)',
+              background: 'var(--paper)', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.65 : 1,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 13,
+              fontSize: 15, fontWeight: 600, color: 'var(--ink-900)', fontFamily: 'inherit',
+              transition: 'background .12s',
+            }}>
+              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" height="20" alt=""/>
+              {loading ? 'Signing in…' : 'Sign in with Google'}
+            </button>
+
+            {error && (
+              <div style={{ marginTop: 12, padding: 12, borderRadius: 'var(--r-md)', background: 'var(--danger-bg)', color: 'var(--danger)', fontSize: 13 }}>
+                {error}
+              </div>
+            )}
+
+            <div style={{ marginTop: 22, padding: 14, borderRadius: 'var(--r-md)', background: 'var(--ink-100)', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <IC.Info size={17} style={{ color: 'var(--ink-500)', marginTop: 1 }}/>
+              <div style={{ fontSize: 13, color: 'var(--ink-600)', lineHeight: 1.5 }}>
+                Sign in with your <strong>@grace.com</strong> Google account. Contact your supervisor if you need access.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Site selector ───────────────────────────────────────────────── */
+
+  function SiteScreen({ equipment, onSelect }) {
+    const sites = [...new Set(equipment.map(e => e.site))].sort();
+    return (
+      <div className="gx" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 460 }}>
+          <div style={{ textAlign: 'center', marginBottom: 28 }}>
+            <div style={{ width: 60, height: 60, borderRadius: 14, background: 'var(--ink-900)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 26, margin: '0 auto 14px' }}>G</div>
+            <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em' }}>Select your plant</div>
+            <div style={{ fontSize: 13, color: 'var(--ink-500)', marginTop: 6 }}>Choose the plant you are currently working at.</div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {sites.map(site => (
+              <button key={site} onClick={() => onSelect(site)} className="gx-card" style={{
+                padding: '18px 22px', textAlign: 'left', cursor: 'pointer', border: '1px solid var(--ink-200)',
+                display: 'flex', alignItems: 'center', gap: 14, transition: 'border-color .12s, box-shadow .12s',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor='var(--accent)'; e.currentTarget.style.boxShadow='0 0 0 3px var(--accent-100)'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor='var(--ink-200)'; e.currentTarget.style.boxShadow='var(--sh-1)'; }}
+              >
+                <div style={{ width: 42, height: 42, borderRadius: 10, background: 'var(--ink-100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <IC.Building size={20} style={{ color: 'var(--ink-700)' }}/>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 16, fontWeight: 700 }}>{site}</div>
+                  <div style={{ fontSize: 12, color: 'var(--ink-500)', marginTop: 2 }}>
+                    {equipment.filter(e => e.site === site).length} equipment items
+                  </div>
+                </div>
+                <IC.ChevronRight size={18} style={{ color: 'var(--ink-400)' }}/>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Home screen ─────────────────────────────────────────────────── */
+
+  function HomeScreen({ site, user, records, onLogDowntime, onViewHistory, onSignOut }) {
+    const today       = new Date().toISOString().substring(0, 10);
+    const todayRecs   = records.filter(r => (r.start_time || '').startsWith(today));
+    const todayMins   = todayRecs.reduce((s, r) => s + (parseInt(r.duration_minutes) || 0), 0);
+    const tH          = Math.floor(todayMins / 60);
+    const tM          = todayMins % 60;
+    const dayOfWeek   = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+    const dateStr     = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const firstName   = user.name.split(' ')[0];
+    const hour        = new Date().getHours();
+    const greeting    = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
+    const stats = [
+      { n: String(todayRecs.length),    l: 'Events today',   tone: todayRecs.length > 0 ? 'warn' : 'ink' },
+      { n: `${tH}h ${tM}m`,             l: 'Downtime today', tone: todayMins > 120 ? 'warn' : 'ink' },
+      { n: String(records.length),       l: 'Total records',  tone: 'ink' },
+      { n: site,                         l: 'Your plant',     tone: 'accent' },
+    ];
+
+    return (
+      <div className="gx" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <TopBar plant={site} user={user} onSignOut={onSignOut}/>
+        <div style={{ flex: 1, padding: '26px 40px', overflowY: 'auto' }}>
+          <div style={{ fontSize: 12, color: 'var(--ink-500)', fontWeight: 500 }}>{dayOfWeek} · {dateStr}</div>
+          <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.02em', marginTop: 3 }}>
+            {greeting}, {firstName}.
+          </div>
+
+          {/* Stats row */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginTop: 20 }}>
+            {stats.map((s, i) => (
+              <div key={i} className="gx-card" style={{ padding: 16 }}>
+                <div className="num" style={{
+                  fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em',
+                  color: s.tone === 'warn' ? 'var(--warn)' : s.tone === 'accent' ? 'var(--accent-600)' : 'var(--ink-900)',
+                  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                }}>{s.n}</div>
+                <div style={{ fontSize: 12, color: 'var(--ink-500)', marginTop: 3 }}>{s.l}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Main action cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 12, marginTop: 14 }}>
+            <button onClick={onLogDowntime} style={{
+              padding: '26px 28px', textAlign: 'left', cursor: 'pointer', border: 'none',
+              borderRadius: 'var(--r-lg)', background: 'var(--accent)', color: 'white',
+              display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+              minHeight: 158, boxShadow: 'var(--sh-2)', transition: 'background .12s',
+            }}
+              onMouseEnter={e => e.currentTarget.style.background='var(--accent-600)'}
+              onMouseLeave={e => e.currentTarget.style.background='var(--accent)'}
+            >
+              <div style={{ width: 48, height: 48, borderRadius: 11, background: 'rgba(255,255,255,.18)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <IC.Plus size={24} stroke={2.5}/>
+              </div>
+              <div>
+                <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em' }}>Log downtime</div>
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,.75)', marginTop: 3 }}>Capture a new event now</div>
+              </div>
+            </button>
+
+            <button onClick={onViewHistory} style={{
+              padding: '26px 28px', textAlign: 'left', cursor: 'pointer', border: '1px solid var(--ink-200)',
+              borderRadius: 'var(--r-lg)', background: 'var(--paper)', color: 'var(--ink-900)',
+              display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+              minHeight: 158, boxShadow: 'var(--sh-1)', transition: 'background .12s',
+            }}
+              onMouseEnter={e => e.currentTarget.style.background='var(--ink-50)'}
+              onMouseLeave={e => e.currentTarget.style.background='var(--paper)'}
+            >
+              <div style={{ width: 48, height: 48, borderRadius: 11, background: 'var(--ink-100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <IC.History size={24} stroke={2} style={{ color: 'var(--ink-700)' }}/>
+              </div>
+              <div>
+                <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em' }}>View history</div>
+                <div style={{ fontSize: 13, color: 'var(--ink-500)', marginTop: 3 }}>{records.length} total records</div>
+              </div>
+            </button>
+          </div>
+
+          {/* Today's entries */}
+          {todayRecs.length > 0 && (
+            <div className="gx-card" style={{ padding: 18, marginTop: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>Today's entries</div>
+                <button onClick={onViewHistory} style={{ fontSize: 12, color: 'var(--accent-600)', fontWeight: 600, cursor: 'pointer', background: 'none', border: 'none' }}>See all →</button>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                {todayRecs.slice(0, 5).map((r, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: i < Math.min(todayRecs.length-1, 4) ? '1px solid var(--ink-100)' : 'none' }}>
+                    <div style={{ width: 4, height: 32, borderRadius: 2, flexShrink: 0, background: r.category === 'Unplanned' ? 'var(--danger)' : 'var(--accent)' }}/>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <span className="id" style={{ color: 'var(--accent-600)', marginRight: 6 }}>{r.equipment_id}</span>
+                        <span style={{ color: 'var(--ink-700)', fontWeight: 400 }}>{r.equipment_name || ''}</span>
+                      </div>
+                      <div style={{ fontSize: 12, color: 'var(--ink-500)' }}>{r.reason} · <span className="dur">{r.duration_minutes}m</span></div>
+                    </div>
+                    <span style={{
+                      fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 999,
+                      background: r.category === 'Unplanned' ? 'var(--danger-bg)' : 'var(--accent-50)',
+                      color: r.category === 'Unplanned' ? 'var(--danger)' : 'var(--accent-600)',
+                    }}>{r.category}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Form screen ─────────────────────────────────────────────────── */
+
+  function FormScreen({ site, equipment, reasons, user, onSubmit, onCancel }) {
+    const [equip,     setEquip]     = useState(null);
+    const [catId,     setCatId]     = useState('');
+    const [reason,    setReason]    = useState(null);
+    const [impact,    setImpact]    = useState('partial');
+    const [shift,     setShift]     = useState('');
+    const [operator,  setOperator]  = useState(user.name);
+    const [notes,     setNotes]     = useState('');
+    const [submitting, setSub]      = useState(false);
+    const [error,     setError]     = useState('');
+
+    const [startTime, setStart] = useState(() => {
+      const n = new Date();
+      return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+    });
+    const [endTime, setEnd] = useState('');
+
+    const cat = CATS.find(c => c.id === catId);
+    const toMin = (t) => { const [h, m] = (t || '00:00').split(':').map(Number); return (h||0)*60+(m||0); };
+    const durMin = endTime ? Math.max(0, toMin(endTime) - toMin(startTime)) : 0;
+    const durLabel = `${Math.floor(durMin/60)}h ${String(durMin%60).padStart(2,'0')}m`;
+
+    // Reasons filtered by planned/unplanned
+    const filteredReasons = cat
+      ? reasons.filter(r => r.category === (cat.planned ? 'Planned' : 'Unplanned'))
+      : [];
+
+    // Reset reason when category changes
+    useEffect(() => { setReason(null); }, [catId]);
+
+    const equipOpts  = equipment.map(e => ({ value: e.id, code: e.id, label: e.name }));
+    const reasonOpts = filteredReasons.map(r => ({ value: r.name, label: r.name }));
+
+    const canSubmit = equip && catId && reason && durMin > 0;
+
+    async function handleSubmit() {
+      if (!canSubmit || submitting) return;
+      setSub(true); setError('');
+      try {
+        const now    = new Date().toISOString();
+        const id     = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const region = siteToRegion(site);
+        const record = {
+          id, site,
+          equipment_id:     equip.value,
+          equipment_name:   equip.label,
+          reason:           reason.label,
+          duration_minutes: durMin,
+          category:         cat.planned ? 'Planned' : 'Unplanned',
+          category_detail:  cat.label,
+          impact, shift,
+          operator_name:    operator,
+          notes,
+          start_time:       now,
+          user_email:       _auth.currentUser?.email || '',
+        };
+        const filename = `${now.substring(0,19).replace(/:/g,'-')}-${id}.json`;
+        await _storage.ref(`records/${region}/${filename}`)
+          .putString(JSON.stringify(record), 'raw', { contentType: 'application/json' });
+        onSubmit(record);
+      } catch (e) {
+        setError(e.message);
+        setSub(false);
+      }
+    }
+
+    return (
+      <div className="gx" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <TopBar back={onCancel} plant={site} user={user} subtitle="New entry"/>
+
+        <div style={{ flex: 1, padding: '16px 40px 0', overflowY: 'auto' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 14 }}>
+            <div>
+              <div style={{ fontSize: 12, color: 'var(--ink-500)', fontWeight: 500 }}>New entry</div>
+              <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em' }}>Log downtime</div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--ink-500)' }}>
+              <IC.Clock size={13}/> Started {startTime}
+            </div>
+          </div>
+
+          {/* 1 – Equipment */}
+          <div style={{ marginBottom: 14 }}>
+            <label className="gx-label">
+              <span style={{ background: 'var(--accent)', color: 'white', padding: '1px 6px', borderRadius: 4, marginRight: 6, fontSize: 10 }}>1</span>
+              Equipment
+            </label>
+            <Dropdown
+              value={equip?.value}
+              valueLabel={equip ? `${equip.code} · ${equip.label}` : null}
+              options={equipOpts}
+              placeholder="Search by tag or name…"
+              onChange={o => setEquip(o)}
+            />
+          </div>
+
+          {/* 2 – Category */}
+          <div style={{ marginBottom: 14 }}>
+            <label className="gx-label">
+              <span style={{ background: 'var(--accent)', color: 'white', padding: '1px 6px', borderRadius: 4, marginRight: 6, fontSize: 10 }}>2</span>
+              Downtime category
+            </label>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6 }}>
+              {CATS.map(c => {
+                const sel = c.id === catId;
+                return (
+                  <button key={c.id} onClick={() => setCatId(c.id)} style={{
+                    minHeight: 80, border: 'none', cursor: 'pointer', borderRadius: 'var(--r-md)',
+                    background: sel ? c.bg : 'var(--paper)',
+                    boxShadow: sel ? `inset 0 0 0 2px ${c.color}` : 'inset 0 0 0 1.5px var(--ink-200)',
+                    padding: '10px', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 5,
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                      <span style={{ width: 7, height: 7, borderRadius: 4, background: c.color, flexShrink: 0, marginTop: 3 }}/>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: sel ? c.color : 'var(--ink-900)', lineHeight: 1.2, flex: 1 }}>{c.label}</span>
+                      {sel && <IC.CheckCircle size={13} style={{ color: c.color, flexShrink: 0 }}/>}
+                    </div>
+                    <div style={{ fontSize: 10, color: 'var(--ink-500)', lineHeight: 1.35 }}>{c.desc}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 3 – Reason + 4 – Time window */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 14, marginBottom: 14 }}>
+            <div>
+              <label className="gx-label">
+                <span style={{ background: 'var(--accent)', color: 'white', padding: '1px 6px', borderRadius: 4, marginRight: 6, fontSize: 10 }}>3</span>
+                Reason
+              </label>
+              <Dropdown
+                value={reason?.value}
+                valueLabel={reason?.label || null}
+                valueSub={cat ? cat.label : null}
+                options={reasonOpts}
+                placeholder={catId ? 'Select reason…' : 'Select a category first'}
+                onChange={o => setReason(o)}
+              />
+            </div>
+
+            <div>
+              <label className="gx-label">
+                <span style={{ background: 'var(--accent)', color: 'white', padding: '1px 6px', borderRadius: 4, marginRight: 6, fontSize: 10 }}>4</span>
+                Time window
+              </label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <input className="gx-field time" value={startTime} onChange={e => setStart(e.target.value)}
+                  style={{ fontSize: 16, height: 56, fontWeight: 700, textAlign: 'center', padding: 0 }}/>
+                <IC.ArrowRight size={13} style={{ color: 'var(--ink-400)' }}/>
+                <input className="gx-field time" value={endTime} onChange={e => setEnd(e.target.value)}
+                  placeholder="end" style={{ fontSize: 16, height: 56, fontWeight: 700, textAlign: 'center', padding: 0 }}/>
+              </div>
+              {/* Quick-add chips */}
+              <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
+                {[[10,'10m'],[15,'15m'],[30,'30m'],[60,'1h'],[120,'2h'],[240,'4h']].map(([m, lbl]) => {
+                  const sel = durMin === m;
+                  return (
+                    <button key={m} onClick={() => {
+                      const base = toMin(startTime);
+                      const end  = base + m;
+                      setEnd(`${String(Math.floor(end/60)%24).padStart(2,'0')}:${String(end%60).padStart(2,'0')}`);
+                    }} style={{
+                      flex: 1, height: 24, border: 'none', cursor: 'pointer', borderRadius: 5,
+                      fontSize: 11, fontWeight: 700,
+                      background: sel ? 'var(--accent)' : 'var(--ink-50)',
+                      color: sel ? 'white' : 'var(--ink-700)',
+                      boxShadow: sel ? 'none' : 'inset 0 0 0 1px var(--ink-200)',
+                    }}>{lbl}</button>
+                  );
+                })}
+              </div>
+              {durMin > 0 && (
+                <div style={{ marginTop: 4, fontSize: 11, color: 'var(--ink-500)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <IC.Timer size={11}/>
+                  <span className="dur">Duration: <strong style={{ color: 'var(--ink-900)' }}>{durLabel}</strong></span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Impact + Shift + Operator */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, marginBottom: 14 }}>
+            <div>
+              <label className="gx-label">Production impact</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4 }}>
+                {['None', 'Partial', 'Full'].map(x => {
+                  const sel = x.toLowerCase() === impact;
+                  return (
+                    <button key={x} onClick={() => setImpact(x.toLowerCase())} style={{
+                      height: 52, border: 'none', cursor: 'pointer', borderRadius: 'var(--r-sm)',
+                      fontSize: 12, fontWeight: 700,
+                      background: sel ? 'var(--accent)' : 'var(--paper)', color: sel ? 'white' : 'var(--ink-700)',
+                      boxShadow: sel ? '0 0 0 3px var(--accent-100)' : 'inset 0 0 0 1.5px var(--ink-200)',
+                    }}>{x}</button>
+                  );
+                })}
+              </div>
+            </div>
+            <div>
+              <label className="gx-label">Shift</label>
+              <select className="gx-field" value={shift} onChange={e => setShift(e.target.value)} style={{ height: 52 }}>
+                <option value="">Select shift</option>
+                <option>Morning</option>
+                <option>Afternoon</option>
+                <option>Night</option>
+              </select>
+            </div>
+            <div>
+              <label className="gx-label">Operator</label>
+              <input className="gx-field" value={operator} onChange={e => setOperator(e.target.value)} placeholder="Your name" style={{ height: 52 }}/>
+            </div>
+          </div>
+
+          {/* Notes (collapsible) */}
+          <details style={{ padding: '10px 14px', borderRadius: 'var(--r-md)', border: '1px dashed var(--ink-200)', background: 'var(--paper)', marginBottom: 16 }}>
+            <summary style={{ cursor: 'pointer', fontSize: 13, fontWeight: 600, color: 'var(--ink-700)', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <IC.Plus size={13}/> Add notes
+              <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--ink-400)', fontWeight: 500 }}>optional</span>
+            </summary>
+            <textarea className="gx-field" value={notes} onChange={e => setNotes(e.target.value)}
+              rows={2} placeholder="Root cause, actions taken, parts replaced…"
+              style={{ height: 68, padding: '10px 12px', resize: 'none', lineHeight: 1.45, marginTop: 10 }}/>
+          </details>
+
+          {error && (
+            <div style={{ marginBottom: 12, padding: 12, borderRadius: 'var(--r-md)', background: 'var(--danger-bg)', color: 'var(--danger)', fontSize: 13 }}>
+              {error}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div style={{ height: 72, padding: '0 40px', borderTop: '1px solid var(--ink-200)', background: 'var(--paper)', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+          {canSubmit
+            ? <><IC.CheckCircle size={18} style={{ color: 'var(--ok)' }}/><div style={{ fontSize: 13, color: 'var(--ink-600)' }}><strong style={{ color: 'var(--ink-900)' }}>Ready.</strong> Press submit to record.</div></>
+            : <><IC.Info size={18} style={{ color: 'var(--ink-400)' }}/><div style={{ fontSize: 13, color: 'var(--ink-500)' }}>Select equipment, category, reason and end time.</div></>
+          }
+          <div style={{ flex: 1 }}/>
+          <button className="gx-btn gx-btn--ghost gx-btn--md" onClick={onCancel}>Cancel</button>
+          <button className="gx-btn gx-btn--primary gx-btn--md" style={{ minWidth: 190 }}
+            onClick={handleSubmit} disabled={!canSubmit || submitting}>
+            {submitting
+              ? <><div className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }}/> Saving…</>
+              : <>Submit record <IC.ArrowRight size={18}/></>
+            }
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Success screen ──────────────────────────────────────────────── */
+
+  function SuccessScreen({ record, onHome, onViewHistory }) {
+    const [countdown, setCountdown] = useState(10);
+    useEffect(() => {
+      const t = setInterval(() => setCountdown(c => { if (c <= 1) { clearInterval(t); onHome(); } return c - 1; }), 1000);
+      return () => clearInterval(t);
+    }, []);
+
+    const dH = Math.floor(record.duration_minutes / 60);
+    const dM = record.duration_minutes % 60;
+    const cat = CATS.find(c => c.id === record.category_id) || {};
+
+    return (
+      <div className="gx" style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--ink-50)' }}>
+        <TopBar/>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 32 }}>
+          <div className="gx-card" style={{ width: 540, padding: 40, textAlign: 'center' }}>
+            <div style={{ width: 76, height: 76, borderRadius: 38, background: 'var(--ok-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px', color: 'var(--ok)' }}>
+              <IC.Check size={38} stroke={3}/>
+            </div>
+            <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em' }}>Entry submitted</div>
+            <div style={{ fontSize: 14, color: 'var(--ink-500)', marginTop: 6 }}>
+              Logged {dH > 0 ? `${dH}h ` : ''}{dM}m of {record.category.toLowerCase()} downtime for{' '}
+              <strong style={{ color: 'var(--ink-900)' }}>{record.equipment_id}</strong>.
+            </div>
+
+            <div style={{ marginTop: 18, padding: 14, borderRadius: 'var(--r-md)', background: 'var(--ink-50)', border: '1px solid var(--ink-200)', display: 'flex', justifyContent: 'space-between', textAlign: 'left' }}>
+              <div>
+                <div style={{ fontSize: 11, color: 'var(--ink-500)', fontWeight: 500 }}>Equipment</div>
+                <div className="id" style={{ fontSize: 15, fontWeight: 700, marginTop: 2 }}>{record.equipment_id}</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-500)', fontWeight: 500 }}>Category</div>
+                <div style={{ fontSize: 13, fontWeight: 600, marginTop: 2 }}>{record.category_detail}</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-500)', fontWeight: 500 }}>Reason</div>
+                <div style={{ fontSize: 13, fontWeight: 600, marginTop: 2 }}>{record.reason}</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 22 }}>
+              <button className="gx-btn gx-btn--secondary gx-btn--md" onClick={onViewHistory}>
+                <IC.List size={17}/> View history
+              </button>
+              <button className="gx-btn gx-btn--primary gx-btn--md" onClick={onHome}>
+                <IC.Plus size={17}/> Log another
+              </button>
+            </div>
+            <div style={{ marginTop: 14, fontSize: 12, color: 'var(--ink-400)' }}>
+              Auto‑returning to home in {countdown}s
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── History screen ──────────────────────────────────────────────── */
+
+  function HistoryScreen({ records, site, user, onNewEntry, onBack, onSignOut }) {
+    const [filter, setFilter] = useState('all');
+
+    const filtered = records.filter(r => {
+      if (filter === 'unplanned') return r.category === 'Unplanned';
+      if (filter === 'planned')   return r.category === 'Planned';
+      return true;
+    });
+
+    const tabs = [
+      { id: 'all',       label: 'All',       count: records.length },
+      { id: 'unplanned', label: 'Unplanned', count: records.filter(r => r.category === 'Unplanned').length },
+      { id: 'planned',   label: 'Planned',   count: records.filter(r => r.category === 'Planned').length },
+    ];
+
+    return (
+      <div className="gx" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <TopBar back={onBack} plant={site} user={user} onSignOut={onSignOut}/>
+        <div style={{ padding: '18px 40px 12px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 24 }}>
+            <div>
+              <div style={{ fontSize: 12, color: 'var(--ink-500)', fontWeight: 500 }}>{site}</div>
+              <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em' }}>History</div>
+            </div>
+            <button className="gx-btn gx-btn--primary gx-btn--sm" onClick={onNewEntry}>
+              <IC.Plus size={15}/> New entry
+            </button>
+          </div>
+          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+            {tabs.map(t => (
+              <button key={t.id} onClick={() => setFilter(t.id)} style={{
+                padding: '7px 13px', borderRadius: 999, fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
+                background: filter === t.id ? 'var(--ink-900)' : 'var(--paper)',
+                color: filter === t.id ? 'white' : 'var(--ink-700)',
+                boxShadow: filter === t.id ? 'none' : 'inset 0 0 0 1px var(--ink-200)',
+                display: 'flex', alignItems: 'center', gap: 7,
+              }}>
+                {t.label}
+                <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 8, background: filter === t.id ? 'rgba(255,255,255,.2)' : 'var(--ink-100)' }}>{t.count}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ flex: 1, padding: '0 40px 20px', overflow: 'hidden' }}>
+          <div className="gx-card" style={{ overflow: 'hidden', height: '100%', display: 'flex', flexDirection: 'column' }}>
+            {/* Table header */}
+            <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr 160px 150px 90px', padding: '9px 18px', fontSize: 10, fontWeight: 700, color: 'var(--ink-500)', textTransform: 'uppercase', letterSpacing: '0.06em', background: 'var(--ink-50)', borderBottom: '1px solid var(--ink-200)', flexShrink: 0 }}>
+              <div>Equipment</div>
+              <div>Reason</div>
+              <div>Category</div>
+              <div>Start time</div>
+              <div>Duration</div>
+            </div>
+            <div style={{ overflowY: 'auto', flex: 1 }}>
+              {filtered.length === 0
+                ? <div style={{ padding: 48, textAlign: 'center', color: 'var(--ink-500)', fontSize: 14 }}>No records found</div>
+                : filtered.map((r, i) => {
+                    const ts  = (r.start_time || '').replace('T',' ').substring(0, 16);
+                    const high = r.duration_minutes >= 120;
+                    return (
+                      <div key={r.id || i} style={{ display: 'grid', gridTemplateColumns: '160px 1fr 160px 150px 90px', padding: '12px 18px', fontSize: 13, alignItems: 'center', borderBottom: '1px solid var(--ink-150)' }}>
+                        <div style={{ minWidth: 0 }}>
+                          <span className="id" style={{ fontWeight: 700, color: 'var(--accent-600)' }}>{r.equipment_id}</span>
+                          {r.equipment_name && <div style={{ fontSize: 11, color: 'var(--ink-500)', marginTop: 1 }}>{r.equipment_name}</div>}
+                        </div>
+                        <div style={{ color: 'var(--ink-600)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', paddingRight: 12 }}>{r.reason}</div>
+                        <div>
+                          <span style={{
+                            fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 999,
+                            background: r.category === 'Unplanned' ? 'var(--danger-bg)' : 'var(--accent-50)',
+                            color: r.category === 'Unplanned' ? 'var(--danger)' : 'var(--accent-600)',
+                          }}>{r.category_detail || r.category}</span>
+                        </div>
+                        <div className="time" style={{ color: 'var(--ink-600)', fontSize: 12 }}>{ts}</div>
+                        <div>
+                          <span className="dur" style={{
+                            fontSize: 12, fontWeight: 700, padding: '3px 9px', borderRadius: 999,
+                            background: high ? 'var(--danger-bg)' : 'var(--warn-bg)',
+                            color: high ? 'var(--danger)' : 'var(--warn)',
+                          }}>{r.duration_minutes}m</span>
+                        </div>
+                      </div>
+                    );
+                  })
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── App root ────────────────────────────────────────────────────── */
+
+  function App() {
+    const [screen,    setScreen]  = useState('loading');
+    const [user,      setUser]    = useState(null);
+    const [site,      setSite]    = useState(null);
+    const [equipment, setEquip]   = useState([]);
+    const [reasons,   setReasons] = useState([]);
+    const [records,   setRecords] = useState([]);
+    const [lastRec,   setLastRec] = useState(null);
+    const refreshRef              = useRef(null);
+
+    useEffect(() => {
+      const unsub = _auth.onAuthStateChanged(async fireUser => {
+        if (fireUser) {
+          const name = fireUser.displayName || fireUser.email.split('@')[0];
+          const parts = (fireUser.displayName || name).split(' ');
+          setUser({
+            name,
+            email:    fireUser.email,
+            initials: (parts[0]?.[0] || '').toUpperCase() + (parts[1]?.[0] || '').toUpperCase(),
+          });
+          try {
+            const eq = await storageRead('master/equipment.json');
+            setEquip(eq);
+          } catch {}
+          setScreen('site');
+        } else {
+          setUser(null);
+          setSite(null);
+          setRecords([]);
+          if (refreshRef.current) clearInterval(refreshRef.current);
+          setScreen('login');
+        }
+      });
+      return unsub;
+    }, []);
+
+    async function loadRecords(s) {
+      try {
+        const region = siteToRegion(s);
+        const names  = await storageList(`records/${region}`);
+        const sorted = [...names].sort((a, b) => b.localeCompare(a)).slice(0, 50);
+        const recs   = await Promise.all(sorted.map(n => storageRead(n)));
+        setRecords(recs);
+      } catch {}
+    }
+
+    async function onSiteSelected(s) {
+      setSite(s);
+      setScreen('loading');
+      try {
+        const rData = await storageRead('master/reasons.json');
+        setReasons(rData);
+      } catch {}
+      await loadRecords(s);
+      setScreen('home');
+      if (refreshRef.current) clearInterval(refreshRef.current);
+      refreshRef.current = setInterval(() => loadRecords(s), 30000);
+    }
+
+    async function onSignOut() {
+      if (refreshRef.current) clearInterval(refreshRef.current);
+      await _auth.signOut();
+    }
+
+    function onSubmit(record) {
+      setLastRec(record);
+      setRecords(prev => [record, ...prev].slice(0, 50));
+      setScreen('success');
+    }
+
+    if (screen === 'loading') return (
+      <div className="gx" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div className="spinner" style={{ margin: '0 auto 14px' }}/>
+          <div style={{ fontSize: 13, color: 'var(--ink-500)' }}>Loading…</div>
+        </div>
+      </div>
+    );
+
+    if (screen === 'login')
+      return <LoginScreen onSignIn={() => {}}/>;
+
+    if (screen === 'site')
+      return <SiteScreen equipment={equipment} onSelect={onSiteSelected}/>;
+
+    if (screen === 'home')
+      return <HomeScreen site={site} user={user} records={records}
+        onLogDowntime={() => setScreen('form')}
+        onViewHistory={() => setScreen('history')}
+        onSignOut={onSignOut}/>;
+
+    if (screen === 'form')
+      return <FormScreen
+        site={site}
+        equipment={equipment.filter(e => e.site === site)}
+        reasons={reasons}
+        user={user}
+        onSubmit={onSubmit}
+        onCancel={() => setScreen('home')}/>;
+
+    if (screen === 'success')
+      return <SuccessScreen record={lastRec}
+        onHome={() => setScreen('home')}
+        onViewHistory={() => setScreen('history')}/>;
+
+    if (screen === 'history')
+      return <HistoryScreen records={records} site={site} user={user}
+        onNewEntry={() => setScreen('form')}
+        onBack={() => setScreen('home')}
+        onSignOut={onSignOut}/>;
+
+    return null;
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
 </body>
 </html>
