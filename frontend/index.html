@@ -14,10 +14,10 @@
 
     /* ── Design tokens ────────────────────────────────────────────── */
     :root {
-      --accent:    #0B5FFF;
-      --accent-600:#0A52DD;
-      --accent-50: #EEF3FF;
-      --accent-100:#DCE6FF;
+      --accent:    #7AC143;
+      --accent-600:#6AAF38;
+      --accent-50: #F0F9E8;
+      --accent-100:#DAEFC3;
       --ink-900:   #0F172A;
       --ink-800:   #1E293B;
       --ink-700:   #334155;
@@ -318,10 +318,7 @@
           </button>
         )}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 34, height: 34, borderRadius: 8, background: 'var(--ink-900)', color: 'white',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 13,
-          }}>G</div>
+          <img src="logo.png" alt="W.R. Grace" style={{ height: 32, width: 'auto', display: 'block' }}/>
           <div style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.1 }}>Downtime Logger</div>
         </div>
         <div style={{ flex: 1 }}/>
@@ -405,11 +402,10 @@
           color: 'white', padding: '52px 48px', display: 'flex', flexDirection: 'column',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 42, height: 42, borderRadius: 10, background: 'white', color: 'var(--ink-900)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 19 }}>G</div>
-            <div>
-              <div style={{ fontSize: 17, fontWeight: 700, letterSpacing: '0.02em' }}>GRACE</div>
-              <div style={{ fontSize: 10, color: 'rgba(255,255,255,.45)', letterSpacing: '0.18em', textTransform: 'uppercase' }}>Plant Operations</div>
+            <div style={{ background: 'white', borderRadius: 10, padding: '6px 10px', display: 'inline-flex' }}>
+              <img src="logo.png" alt="W.R. Grace" style={{ height: 28, width: 'auto', display: 'block' }}/>
             </div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,.45)', letterSpacing: '0.18em', textTransform: 'uppercase' }}>Plant Operations</div>
           </div>
           <div style={{ flex: 1 }}/>
           <div style={{ fontSize: 34, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 14 }}>
@@ -515,7 +511,9 @@
       <div className="gx" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ width: 460 }}>
           <div style={{ textAlign: 'center', marginBottom: 28 }}>
-            <div style={{ width: 60, height: 60, borderRadius: 14, background: 'var(--ink-900)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 26, margin: '0 auto 14px' }}>G</div>
+            <div style={{ background: 'var(--ink-900)', borderRadius: 14, padding: '10px 14px', display: 'inline-flex', margin: '0 auto 14px' }}>
+              <img src="logo.png" alt="W.R. Grace" style={{ height: 36, width: 'auto', display: 'block', filter: 'brightness(0) invert(1)' }}/>
+            </div>
             <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em' }}>Select your plant</div>
             <div style={{ fontSize: 13, color: 'var(--ink-500)', marginTop: 6 }}>Choose the plant you are currently working at.</div>
           </div>
