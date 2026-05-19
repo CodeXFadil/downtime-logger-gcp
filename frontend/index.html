@@ -663,15 +663,17 @@
   /* ── Form screen ─────────────────────────────────────────────────── */
 
   function FormScreen({ site, equipment, reasons, user, onSubmit, onCancel }) {
-    const [equip,     setEquip]     = useState(null);
-    const [catId,     setCatId]     = useState('');
-    const [reason,    setReason]    = useState(null);
-    const [impact,    setImpact]    = useState('partial');
-    const [shift,     setShift]     = useState('');
-    const [operator,  setOperator]  = useState(user.name);
-    const [notes,     setNotes]     = useState('');
-    const [submitting, setSub]      = useState(false);
-    const [error,     setError]     = useState('');
+    const [selectedBu,  setBu]      = useState(null);
+    const [selectedSec, setSec]     = useState(null);
+    const [equip,       setEquip]   = useState(null);
+    const [catId,       setCatId]   = useState('');
+    const [reason,      setReason]  = useState(null);
+    const [impact,      setImpact]  = useState('partial');
+    const [shift,       setShift]   = useState('');
+    const [operator,    setOperator]= useState(user.name);
+    const [notes,       setNotes]   = useState('');
+    const [submitting,  setSub]     = useState(false);
+    const [error,       setError]   = useState('');
 
     const [startTime, setStart] = useState(() => {
       const n = new Date();
@@ -684,18 +686,25 @@
     const durMin = endTime ? Math.max(0, toMin(endTime) - toMin(startTime)) : 0;
     const durLabel = `${Math.floor(durMin/60)}h ${String(durMin%60).padStart(2,'0')}m`;
 
+    // Hierarchical equipment filtering
+    const siteEquip   = equipment.filter(e => e.site === site);
+    const busUnits    = [...new Set(siteEquip.map(e => e.business_unit))].sort();
+    const sections    = selectedBu  ? [...new Set(siteEquip.filter(e => e.business_unit === selectedBu).map(e => e.section))].sort() : [];
+    const equipList   = selectedSec ? siteEquip.filter(e => e.business_unit === selectedBu && e.section === selectedSec) : [];
+    const equipOpts   = equipList.map(e => ({ value: e.id, code: e.id, label: e.name }));
+
     // Reasons filtered by planned/unplanned
     const filteredReasons = cat
       ? reasons.filter(r => r.category === (cat.planned ? 'Planned' : 'Unplanned'))
       : [];
 
-    // Reset reason when category changes
+    // Reset downstream when parent changes
+    useEffect(() => { setSec(null); setEquip(null); }, [selectedBu]);
+    useEffect(() => { setEquip(null); }, [selectedSec]);
     useEffect(() => { setReason(null); }, [catId]);
 
-    const equipOpts  = equipment.map(e => ({ value: e.id, code: e.id, label: e.name }));
     const reasonOpts = filteredReasons.map(r => ({ value: r.name, label: r.name }));
-
-    const canSubmit = equip && catId && reason && durMin > 0;
+    const canSubmit  = equip && catId && reason && durMin > 0;
 
     async function handleSubmit() {
       if (!canSubmit || submitting) return;
@@ -706,6 +715,8 @@
         const region = siteToRegion(site);
         const record = {
           id, site,
+          business_unit:    selectedBu,
+          section:          selectedSec,
           equipment_id:     equip.value,
           equipment_name:   equip.label,
           reason:           reason.label,
@@ -743,19 +754,82 @@
             </div>
           </div>
 
-          {/* 1 – Equipment */}
+          {/* 1 – Equipment (hierarchical: BU → Section → Equipment) */}
           <div style={{ marginBottom: 14 }}>
             <label className="gx-label">
               <span style={{ background: 'var(--accent)', color: 'white', padding: '1px 6px', borderRadius: 4, marginRight: 6, fontSize: 10 }}>1</span>
               Equipment
             </label>
-            <Dropdown
-              value={equip?.value}
-              valueLabel={equip ? `${equip.code} · ${equip.label}` : null}
-              options={equipOpts}
-              placeholder="Search by tag or name…"
-              onChange={o => setEquip(o)}
-            />
+
+            {/* Breadcrumb trail */}
+            {(selectedBu || selectedSec || equip) && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, fontSize: 12, color: 'var(--ink-500)' }}>
+                <span style={{ fontWeight: selectedBu && !selectedSec ? 700 : 400, color: selectedBu ? 'var(--ink-700)' : 'var(--ink-400)' }}>{selectedBu || '—'}</span>
+                {selectedSec && <><IC.ChevronRight size={12}/><span style={{ fontWeight: !equip ? 700 : 400, color: 'var(--ink-700)' }}>{selectedSec}</span></>}
+                {equip      && <><IC.ChevronRight size={12}/><span style={{ fontWeight: 700, color: 'var(--accent-600)' }} className="id">{equip.code}</span><span style={{ color: 'var(--ink-600)' }}> · {equip.label}</span></>}
+                <button onClick={() => { setBu(null); setSec(null); setEquip(null); }} style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--accent-600)', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}>
+                  Change
+                </button>
+              </div>
+            )}
+
+            {/* Step A — Business Unit */}
+            {!selectedBu && (
+              <div>
+                <div style={{ fontSize: 11, color: 'var(--ink-500)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Select business unit</div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {busUnits.map(bu => (
+                    <button key={bu} onClick={() => setBu(bu)} style={{
+                      padding: '10px 20px', borderRadius: 'var(--r-md)', border: 'none', cursor: 'pointer',
+                      background: 'var(--paper)', fontWeight: 700, fontSize: 14,
+                      boxShadow: 'inset 0 0 0 1.5px var(--ink-200)',
+                      display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2, minWidth: 140,
+                    }}>
+                      <span>{bu}</span>
+                      <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--ink-500)' }}>
+                        {siteEquip.filter(e => e.business_unit === bu).length} items
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Step B — Section */}
+            {selectedBu && !selectedSec && (
+              <div>
+                <div style={{ fontSize: 11, color: 'var(--ink-500)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Select section · {selectedBu}</div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {sections.map(sec => (
+                    <button key={sec} onClick={() => setSec(sec)} style={{
+                      padding: '10px 20px', borderRadius: 'var(--r-md)', border: 'none', cursor: 'pointer',
+                      background: 'var(--paper)', fontWeight: 700, fontSize: 14,
+                      boxShadow: 'inset 0 0 0 1.5px var(--ink-200)',
+                      display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2, minWidth: 130,
+                    }}>
+                      <span>{sec}</span>
+                      <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--ink-500)' }}>
+                        {siteEquip.filter(e => e.business_unit === selectedBu && e.section === sec).length} items
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Step C — Equipment */}
+            {selectedSec && !equip && (
+              <div>
+                <div style={{ fontSize: 11, color: 'var(--ink-500)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Select equipment · {selectedSec}</div>
+                <Dropdown
+                  value={equip?.value}
+                  valueLabel={null}
+                  options={equipOpts}
+                  placeholder="Search by tag or name…"
+                  onChange={o => setEquip(o)}
+                />
+              </div>
+            )}
           </div>
 
           {/* 2 – Category */}
