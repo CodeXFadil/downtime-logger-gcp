@@ -213,6 +213,54 @@
 
   /* ── Downtime categories ─────────────────────────────────────────── */
 
+  const EQUIPMENT_DATA = [
+    {"id":"CB-AL-R-001","name":"Reactor Vessel A",   "site":"Curtis Bay","business_unit":"Alumina",   "section":"Reaction"},
+    {"id":"CB-AL-R-002","name":"Reactor Vessel B",   "site":"Curtis Bay","business_unit":"Alumina",   "section":"Reaction"},
+    {"id":"CB-AL-P-001","name":"Feed Pump A",         "site":"Curtis Bay","business_unit":"Alumina",   "section":"Reaction"},
+    {"id":"CB-AL-P-002","name":"Feed Pump B",         "site":"Curtis Bay","business_unit":"Alumina",   "section":"Reaction"},
+    {"id":"CB-AL-F-001","name":"Process Filter 1",    "site":"Curtis Bay","business_unit":"Alumina",   "section":"Filtration"},
+    {"id":"CB-AL-F-002","name":"Process Filter 2",    "site":"Curtis Bay","business_unit":"Alumina",   "section":"Filtration"},
+    {"id":"CB-AL-F-003","name":"Filter Press A",      "site":"Curtis Bay","business_unit":"Alumina",   "section":"Filtration"},
+    {"id":"CB-AL-D-001","name":"Spray Dryer",         "site":"Curtis Bay","business_unit":"Alumina",   "section":"Drying"},
+    {"id":"CB-AL-D-002","name":"Fluid Bed Dryer",     "site":"Curtis Bay","business_unit":"Alumina",   "section":"Drying"},
+    {"id":"CB-AL-PK-001","name":"Bag Filler A",       "site":"Curtis Bay","business_unit":"Alumina",   "section":"Packaging"},
+    {"id":"CB-AL-PK-002","name":"Bag Filler B",       "site":"Curtis Bay","business_unit":"Alumina",   "section":"Packaging"},
+    {"id":"CB-AL-PK-003","name":"Palletiser",         "site":"Curtis Bay","business_unit":"Alumina",   "section":"Packaging"},
+    {"id":"CB-ZL-R-001","name":"Zeolite Reactor A",   "site":"Curtis Bay","business_unit":"Zeolite",   "section":"Reaction"},
+    {"id":"CB-ZL-R-002","name":"Zeolite Reactor B",   "site":"Curtis Bay","business_unit":"Zeolite",   "section":"Reaction"},
+    {"id":"CB-ZL-P-001","name":"Slurry Pump A",       "site":"Curtis Bay","business_unit":"Zeolite",   "section":"Reaction"},
+    {"id":"CB-ZL-C-001","name":"Centrifuge 1",        "site":"Curtis Bay","business_unit":"Zeolite",   "section":"Processing"},
+    {"id":"CB-ZL-C-002","name":"Centrifuge 2",        "site":"Curtis Bay","business_unit":"Zeolite",   "section":"Processing"},
+    {"id":"CB-ZL-W-001","name":"Wash Column A",       "site":"Curtis Bay","business_unit":"Zeolite",   "section":"Processing"},
+    {"id":"CB-ZL-PK-001","name":"Zeolite Bag Filler", "site":"Curtis Bay","business_unit":"Zeolite",   "section":"Packaging"},
+    {"id":"CB-ZL-PK-002","name":"Zeolite Conveyor",   "site":"Curtis Bay","business_unit":"Zeolite",   "section":"Packaging"},
+    {"id":"CB-UT-C-001","name":"Air Compressor 1",    "site":"Curtis Bay","business_unit":"Utilities", "section":"Compression"},
+    {"id":"CB-UT-C-002","name":"Air Compressor 2",    "site":"Curtis Bay","business_unit":"Utilities", "section":"Compression"},
+    {"id":"CB-UT-C-003","name":"Nitrogen Compressor", "site":"Curtis Bay","business_unit":"Utilities", "section":"Compression"},
+    {"id":"CB-UT-HX-001","name":"Heat Exchanger 1",   "site":"Curtis Bay","business_unit":"Utilities", "section":"Heat Exchange"},
+    {"id":"CB-UT-HX-002","name":"Heat Exchanger 2",   "site":"Curtis Bay","business_unit":"Utilities", "section":"Heat Exchange"},
+    {"id":"CB-UT-HX-003","name":"Cooling Tower",      "site":"Curtis Bay","business_unit":"Utilities", "section":"Heat Exchange"},
+    {"id":"CB-UT-E-001","name":"Main Transformer",    "site":"Curtis Bay","business_unit":"Utilities", "section":"Power"},
+    {"id":"CB-UT-E-002","name":"Backup Generator",    "site":"Curtis Bay","business_unit":"Utilities", "section":"Power"},
+    {"id":"KT-AL-R-001","name":"Reactor Vessel A",    "site":"Kuantan",   "business_unit":"Alumina",   "section":"Reaction"},
+    {"id":"KT-AL-R-002","name":"Reactor Vessel B",    "site":"Kuantan",   "business_unit":"Alumina",   "section":"Reaction"},
+    {"id":"KT-AL-P-001","name":"Feed Pump A",         "site":"Kuantan",   "business_unit":"Alumina",   "section":"Reaction"},
+    {"id":"KT-AL-P-002","name":"Discharge Pump",      "site":"Kuantan",   "business_unit":"Alumina",   "section":"Reaction"},
+    {"id":"KT-AL-F-001","name":"Process Filter 1",    "site":"Kuantan",   "business_unit":"Alumina",   "section":"Filtration"},
+    {"id":"KT-AL-F-002","name":"Process Filter 2",    "site":"Kuantan",   "business_unit":"Alumina",   "section":"Filtration"},
+    {"id":"KT-AL-D-001","name":"Spray Dryer",         "site":"Kuantan",   "business_unit":"Alumina",   "section":"Drying"},
+    {"id":"KT-AL-PK-001","name":"Bag Filler A",       "site":"Kuantan",   "business_unit":"Alumina",   "section":"Packaging"},
+    {"id":"KT-AL-PK-002","name":"Bag Filler B",       "site":"Kuantan",   "business_unit":"Alumina",   "section":"Packaging"},
+    {"id":"KT-ZL-R-001","name":"Zeolite Reactor A",   "site":"Kuantan",   "business_unit":"Zeolite",   "section":"Reaction"},
+    {"id":"KT-ZL-P-001","name":"Slurry Pump A",       "site":"Kuantan",   "business_unit":"Zeolite",   "section":"Reaction"},
+    {"id":"KT-ZL-C-001","name":"Centrifuge 1",        "site":"Kuantan",   "business_unit":"Zeolite",   "section":"Processing"},
+    {"id":"KT-ZL-PK-001","name":"Zeolite Bag Filler", "site":"Kuantan",   "business_unit":"Zeolite",   "section":"Packaging"},
+    {"id":"KT-UT-C-001","name":"Air Compressor 1",    "site":"Kuantan",   "business_unit":"Utilities", "section":"Compression"},
+    {"id":"KT-UT-C-002","name":"Air Compressor 2",    "site":"Kuantan",   "business_unit":"Utilities", "section":"Compression"},
+    {"id":"KT-UT-HX-001","name":"Heat Exchanger",     "site":"Kuantan",   "business_unit":"Utilities", "section":"Heat Exchange"},
+    {"id":"KT-UT-E-001","name":"Main Transformer",    "site":"Kuantan",   "business_unit":"Utilities", "section":"Power"},
+  ];
+
   const CATS = [
     { id: 'unp-maint', label: 'Unplanned Maintenance', color: '#DC2626', bg: '#FEF2F2', planned: false,
       desc: 'Equipment failure, breakdown, or unscheduled repair.' },
@@ -688,8 +736,8 @@
 
     // Hierarchical equipment filtering
     const siteEquip   = equipment.filter(e => e.site === site);
-    const busUnits    = [...new Set(siteEquip.map(e => e.business_unit))].sort();
-    const sections    = selectedBu  ? [...new Set(siteEquip.filter(e => e.business_unit === selectedBu).map(e => e.section))].sort() : [];
+    const busUnits    = [...new Set(siteEquip.map(e => e.business_unit))].filter(Boolean).sort();
+    const sections    = selectedBu  ? [...new Set(siteEquip.filter(e => e.business_unit === selectedBu).map(e => e.section))].filter(Boolean).sort() : [];
     const equipList   = selectedSec ? siteEquip.filter(e => e.business_unit === selectedBu && e.section === selectedSec) : [];
     const equipOpts   = equipList.map(e => ({ value: e.id, code: e.id, label: e.name }));
 
@@ -761,69 +809,72 @@
               Equipment
             </label>
 
-            {/* Breadcrumb trail */}
-            {(selectedBu || selectedSec || equip) && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, fontSize: 12, color: 'var(--ink-500)' }}>
-                <span style={{ fontWeight: selectedBu && !selectedSec ? 700 : 400, color: selectedBu ? 'var(--ink-700)' : 'var(--ink-400)' }}>{selectedBu || '—'}</span>
-                {selectedSec && <><IC.ChevronRight size={12}/><span style={{ fontWeight: !equip ? 700 : 400, color: 'var(--ink-700)' }}>{selectedSec}</span></>}
-                {equip      && <><IC.ChevronRight size={12}/><span style={{ fontWeight: 700, color: 'var(--accent-600)' }} className="id">{equip.code}</span><span style={{ color: 'var(--ink-600)' }}> · {equip.label}</span></>}
-                <button onClick={() => { setBu(null); setSec(null); setEquip(null); }} style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--accent-600)', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}>
-                  Change
-                </button>
-              </div>
-            )}
-
-            {/* Step A — Business Unit */}
-            {!selectedBu && (
-              <div>
-                <div style={{ fontSize: 11, color: 'var(--ink-500)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Select business unit</div>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {busUnits.map(bu => (
+            {/* Row A — Business Unit (always visible) */}
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ fontSize: 11, color: 'var(--ink-500)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Business unit</div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {busUnits.map(bu => {
+                  const sel = bu === selectedBu;
+                  return (
                     <button key={bu} onClick={() => setBu(bu)} style={{
                       padding: '10px 20px', borderRadius: 'var(--r-md)', border: 'none', cursor: 'pointer',
-                      background: 'var(--paper)', fontWeight: 700, fontSize: 14,
-                      boxShadow: 'inset 0 0 0 1.5px var(--ink-200)',
+                      background: sel ? 'var(--accent-50)' : 'var(--paper)', fontWeight: 700, fontSize: 14,
+                      boxShadow: sel ? 'inset 0 0 0 2px var(--accent)' : 'inset 0 0 0 1.5px var(--ink-200)',
+                      color: sel ? 'var(--accent-600)' : 'var(--ink-900)',
                       display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2, minWidth: 140,
+                      transition: 'all .12s',
                     }}>
-                      <span>{bu}</span>
-                      <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--ink-500)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        {sel && <IC.CheckCircle size={14} style={{ color: 'var(--accent)', flexShrink: 0 }}/>}
+                        <span>{bu}</span>
+                      </div>
+                      <span style={{ fontSize: 11, fontWeight: 400, color: sel ? 'var(--accent-600)' : 'var(--ink-500)' }}>
                         {siteEquip.filter(e => e.business_unit === bu).length} items
                       </span>
                     </button>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
-            )}
+            </div>
 
-            {/* Step B — Section */}
-            {selectedBu && !selectedSec && (
-              <div>
-                <div style={{ fontSize: 11, color: 'var(--ink-500)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Select section · {selectedBu}</div>
+            {/* Row B — Section (visible once BU selected) */}
+            {selectedBu && (
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-500)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Section</div>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {sections.map(sec => (
-                    <button key={sec} onClick={() => setSec(sec)} style={{
-                      padding: '10px 20px', borderRadius: 'var(--r-md)', border: 'none', cursor: 'pointer',
-                      background: 'var(--paper)', fontWeight: 700, fontSize: 14,
-                      boxShadow: 'inset 0 0 0 1.5px var(--ink-200)',
-                      display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2, minWidth: 130,
-                    }}>
-                      <span>{sec}</span>
-                      <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--ink-500)' }}>
-                        {siteEquip.filter(e => e.business_unit === selectedBu && e.section === sec).length} items
-                      </span>
-                    </button>
-                  ))}
+                  {sections.map(sec => {
+                    const sel = sec === selectedSec;
+                    return (
+                      <button key={sec} onClick={() => setSec(sec)} style={{
+                        padding: '10px 20px', borderRadius: 'var(--r-md)', border: 'none', cursor: 'pointer',
+                        background: sel ? 'var(--accent-50)' : 'var(--paper)', fontWeight: 700, fontSize: 14,
+                        boxShadow: sel ? 'inset 0 0 0 2px var(--accent)' : 'inset 0 0 0 1.5px var(--ink-200)',
+                        color: sel ? 'var(--accent-600)' : 'var(--ink-900)',
+                        display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2, minWidth: 130,
+                        transition: 'all .12s',
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          {sel && <IC.CheckCircle size={14} style={{ color: 'var(--accent)', flexShrink: 0 }}/>}
+                          <span>{sec}</span>
+                        </div>
+                        <span style={{ fontSize: 11, fontWeight: 400, color: sel ? 'var(--accent-600)' : 'var(--ink-500)' }}>
+                          {siteEquip.filter(e => e.business_unit === selectedBu && e.section === sec).length} items
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
 
-            {/* Step C — Equipment */}
-            {selectedSec && !equip && (
+            {/* Row C — Equipment dropdown (visible once Section selected) */}
+            {selectedSec && (
               <div>
-                <div style={{ fontSize: 11, color: 'var(--ink-500)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Select equipment · {selectedSec}</div>
+                <div style={{ fontSize: 11, color: 'var(--ink-500)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Equipment</div>
                 <Dropdown
                   value={equip?.value}
-                  valueLabel={null}
+                  valueLabel={equip?.label || null}
+                  valueSub={equip?.code || null}
                   options={equipOpts}
                   placeholder="Search by tag or name…"
                   onChange={o => setEquip(o)}
@@ -1148,7 +1199,7 @@
     const [screen,    setScreen]  = useState('loading');
     const [user,      setUser]    = useState(null);
     const [site,      setSite]    = useState(null);
-    const [equipment, setEquip]   = useState([]);
+    const [equipment, setEquip]   = useState(EQUIPMENT_DATA);
     const [reasons,   setReasons] = useState([]);
     const [records,   setRecords] = useState([]);
     const [lastRec,   setLastRec] = useState(null);
@@ -1166,8 +1217,10 @@
           });
           try {
             const eq = await storageRead('master/equipment.json');
-            setEquip(eq);
-          } catch {}
+            // Use fetched data only if it has hierarchical fields; otherwise use embedded data
+            const hasHierarchy = eq.length > 0 && eq[0].business_unit;
+            setEquip(hasHierarchy ? eq : EQUIPMENT_DATA);
+          } catch { setEquip(EQUIPMENT_DATA); }
           setScreen('site');
         } else {
           setUser(null);

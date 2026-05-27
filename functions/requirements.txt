@@ -1,3 +1,3 @@
-functions-framework==3.*
+firebase-functions
 google-cloud-storage==2.*
 firebase-admin==6.*

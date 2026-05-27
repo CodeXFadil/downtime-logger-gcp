@@ -20,10 +20,10 @@ GCLOUD = (
 
 _BASE = "https://{}-rplpwbvuwq-uc.a.run.app"
 ROUTES = {
-    "/api/health":      _BASE.format("downtime-logger-health-us"),
-    "/api/master-data": _BASE.format("downtime-logger-master-data-us"),
-    "/api/records":     _BASE.format("downtime-logger-records-us"),
-    "/api/submit":      _BASE.format("downtime-logger-submit-us"),
+    "/api/health":      _BASE.format("health"),
+    "/api/master-data": _BASE.format("master-data"),
+    "/api/records":     _BASE.format("records"),
+    "/api/submit":      _BASE.format("submit"),
 }
 
 FRONTEND = os.path.join(os.path.dirname(__file__), "frontend")
@@ -50,7 +50,14 @@ def proxy(path):
     if not target:
         return Response('{"error":"unknown route"}', status=404, mimetype="application/json")
 
-    headers = {"Authorization": f"Bearer {_token()}", "Content-Type": "application/json"}
+    # Cloud Run IAM requires a gcloud OIDC token in Authorization
+    # Pass the browser's Firebase token in a custom header so Python code can verify it
+    firebase_auth = request.headers.get("Authorization", "")
+    headers = {
+        "Authorization":    f"Bearer {_token()}",
+        "Content-Type":     "application/json",
+        "X-Firebase-Token": firebase_auth.removeprefix("Bearer ").strip(),
+    }
     if request.method == "POST":
         resp = requests.post(target, data=request.get_data(), headers=headers, timeout=20)
     else:
