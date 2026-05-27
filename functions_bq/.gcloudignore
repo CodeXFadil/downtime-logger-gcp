@@ -1,0 +1,9 @@
+.gcloudignore
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+tests/
+local.settings.json
+local.settings.json.example
